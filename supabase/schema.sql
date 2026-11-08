@@ -267,7 +267,7 @@ begin
   where code = upper(trim(p_code)) returning * into v_team;
   if not found then raise exception 'No team with code %', p_code; end if;
   insert into broadcasts (team_code, kind, sender, voice, body, payload)
-  values (v_team.code, 'family_clue', 'Operator Arco', 'operator', 'Your Family Relay clue just came in. It unlocks after three relays.',
+  values (v_team.code, 'family_clue', 'Operator Arco', 'operator', 'Station ARCO to your family only. Your Family Relay clue just came in. It unlocks after three relays. Over.',
           jsonb_build_object('text', p_clue, 'hash', answer_hash(p_answer)));
 end $$;
 

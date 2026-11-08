@@ -11,9 +11,9 @@
     { sender: "Ambassador Gobbles", voice: "gobbles" },
   ];
   const SAVED_LINES = [
-    { sender: "The Bad Guys", body: "Your ambassador wouldn't stop talking about gratitude, so we took him to the substation. Bring every code you've got." },
-    { sender: "Operator Arco", body: "All agents: head to the Arco Rec Center now. The switch goes at noon." },
-    { sender: "Operator Arco", body: "Agents, check in. If you're stuck, use a hint. It only costs 25 points." },
+    { sender: "The Bad Guys", body: "Breaking in on this frequency. Your ambassador wouldn't stop talking about gratitude, so we took him to the substation. Bring every code you've got. Bad Guys out." },
+    { sender: "Operator Arco", body: "Station ARCO to all agents. Head to the Arco Rec Center now. The switch goes at noon. Over." },
+    { sender: "Operator Arco", body: "Station ARCO to all agents. Check in. If you're stuck, use a hint. It only costs 25 points. Over." },
   ];
   const FACT_LABELS = { weddingYear: "Wedding year", pet: "Pet", favorite: "Favorite", place: "Place", secret: "Secret" };
 
