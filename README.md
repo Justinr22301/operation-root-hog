@@ -85,8 +85,8 @@ select end_of_game_cleanup();
 
 ## Recorded audio
 
-Leave `audio` as `null` and the app reads text aloud with the phone's voice. To use recordings, put
-mp3 files in `app/audio/` and set the `audio` field in `content.js`, for example `audio: "audio/hijack.mp3"`.
+`VOICE-SCRIPT.md` has every line by voice with its file name. Save the recordings in `app/audio/` under those
+names; `content.js` already points at them. Until a file exists, the phone reads that line aloud instead.
 
 ## When you change files after phones have loaded the game
 

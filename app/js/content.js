@@ -39,20 +39,21 @@ window.GAME = {
 
   // The briefing plays as scenes: a picture (see js/scenes.js) with narration under it.
   // With sound on, each scene is read aloud and the next one starts when it finishes.
-  // image: "img/file.jpg" swaps the drawing for a photo. audio: "audio/file.mp3" swaps the phone's voice for a recording.
+  // image: "img/file.jpg" swaps the drawing for a photo. audio: the recording for that line (see VOICE-SCRIPT.md);
+  // until the file exists in app/audio/, the phone reads the text aloud instead.
   briefing: [
     {
       scene: "radio",
       voice: "operator",
       from: "Station ARCO",
-      audio: null,
+      audio: "audio/briefing-01-radio.mp3",
       text: "Incoming transmission. All agents, stand by.",
     },
     {
       scene: "summit",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-02-summit.mp3",
       cut: true, // the Bad Guys break in mid-sentence: no pause before the next scene
       text:
         "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\n" +
@@ -63,7 +64,7 @@ window.GAME = {
       scene: "badguys",
       voice: "badguys",
       from: "The Bad Guys",
-      audio: null,
+      audio: "audio/briefing-03-badguys.mp3",
       text:
         "Breaking in on this frequency. This is the Bad Guys, calling every so-called agent in the Lost River Valley.\n\n" +
         "Remember us? You took our turkey in 2024. This year we're taking the whole town.",
@@ -72,7 +73,7 @@ window.GAME = {
       scene: "blackout",
       voice: "badguys",
       from: "The Bad Guys",
-      audio: null,
+      audio: "audio/briefing-04-blackout.mp3",
       text:
         "Before it was Arco, this place was called Root Hog. Fitting, because today we root out every last light. " +
         "At noon, with every turkey in town in the oven, we cut the power. No ovens, no pie, no Peace Summit.\n\n" +
@@ -82,14 +83,14 @@ window.GAME = {
       scene: "station",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-05-back-on-air.mp3",
       text: "Station ARCO, back on the air. Agents, do you copy?\n\nThat was the Bad Guys. Here's what you need to know.",
     },
     {
       scene: "gobbles",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-06-gobbles.mp3",
       text:
         "Some of you met them in 2024. In Operation Feather Recovery they snatched Ambassador Gobbles, " +
         "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it. " +
@@ -99,7 +100,7 @@ window.GAME = {
       scene: "count",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-07-count.mp3",
       text:
         "Here's what they don't know. This town is named for Count Georg von Arco, a German radio pioneer who never set foot in Idaho. " +
         "Legend says he sent a gift to the town that carried his name: eight radio relays hidden around the valley.",
@@ -108,14 +109,14 @@ window.GAME = {
       scene: "atom1955",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-08-1955.mp3",
       text: "In 1955, when Arco became the first town lit by atomic power, those relays carried the signal.",
     },
     {
       scene: "mission",
       voice: "operator",
       from: "Operator Arco",
-      audio: null,
+      audio: "audio/briefing-09-mission.mp3",
       text:
         "Today the Bad Guys have jammed every relay and power station in the valley. It's up to you to bring them back.\n\n" +
         "Every two relays you restore unlock one digit of your family's code. " +
@@ -128,6 +129,7 @@ window.GAME = {
     {
       id: "sub",
       name: "Sub Relay",
+      audio: "audio/relay-sub.mp3",
       cluster: "arco",
       place: "Idaho Science Center, 335 S. Front St., Arco",
       mapQuery: "335 S Front St, Arco, ID 83213",
@@ -161,6 +163,7 @@ window.GAME = {
     {
       id: "peace",
       name: "Peace Relay",
+      audio: "audio/relay-peace.mp3",
       cluster: "arco",
       place: "Atoms for Peace marker, W. Grand Ave. south of S. Bingham St., Arco",
       mapQuery: "Atoms for Peace historical marker, Arco, ID",
@@ -183,6 +186,7 @@ window.GAME = {
     {
       id: "courthouse",
       name: "Courthouse Relay",
+      audio: "audio/relay-courthouse.mp3",
       cluster: "arco",
       place: "Butte County Courthouse, 256 W. Grand Ave., Arco",
       mapQuery: "256 W Grand Ave, Arco, ID 83213",
@@ -206,6 +210,7 @@ window.GAME = {
     {
       id: "hill",
       name: "Hill Relay",
+      audio: "audio/relay-hill.mp3",
       cluster: "arco",
       place: "Anywhere downtown with a clear view of Number Hill",
       mapQuery: "Number Hill, Arco, ID",
@@ -227,6 +232,7 @@ window.GAME = {
     {
       id: "press",
       name: "Press Relay",
+      audio: "audio/relay-press.mp3",
       cluster: "arco",
       place: "Bottolfsen Park, Arco",
       mapQuery: "Bottolfsen Park, Arco, ID",
@@ -247,6 +253,7 @@ window.GAME = {
     {
       id: "river",
       name: "River Relay",
+      audio: "audio/relay-river.mp3",
       cluster: "arco",
       place: "A bridge over the Big Lost River in Arco (stay on the sidewalk)",
       mapQuery: "Big Lost River, Arco, ID",
@@ -276,6 +283,7 @@ window.GAME = {
     {
       id: "island",
       name: "Island Relay",
+      audio: "audio/relay-island.mp3",
       cluster: "moore",
       place: "Pearson Park, Moore (3150 N. near Main St.)",
       mapQuery: "Pearson Park, Moore, ID",
@@ -299,6 +307,7 @@ window.GAME = {
   family: {
     id: "family",
     name: "Family Relay",
+    audio: "audio/relay-family.mp3",
     unlockAfter: 3,
     transmission:
       "Station ARCO to your family only.\n\nThis relay is coded for you. No one else in the valley can solve it. Work it out in the car. Over.",
@@ -320,7 +329,7 @@ window.GAME = {
     switchText: "Junior agents, on Operator Arco's count, throw the switch.",
     victory: {
       from: "Ambassador Gobbles",
-      audio: null, // e.g. "audio/victory.mp3"
+      audio: "audio/finale-victory.mp3",
       text:
         "Agents, thank you. The Bad Guys were sure no single family could throw that switch, and they were right. It took all of you. " +
         "The Peace Summit is back on, and the pie is ready. Happy Thanksgiving. Over and out.",
