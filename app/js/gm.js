@@ -75,6 +75,7 @@
       setClue: (code, clue, answer) => rpc("gm_set_family_clue", { p_code: code, p_clue: clue, p_answer: answer }),
       send: (body, sender, voice, code) => rpc("gm_send_broadcast", { p_body: body, p_sender: sender, p_voice: voice, p_team_code: code || null }),
       throwSwitch: () => rpc("gm_throw_master_switch"),
+      setStarted: (on) => rpc("gm_set_game_started", { p_started: on }),
     };
   }
 
@@ -83,6 +84,7 @@
     const solve = (m, hints, mapUsed, jr) => ({ at: min(m), hints: hints || 0, map: !!mapUsed, juniorFirstTry: !!jr });
     const st = {
       now: new Date().toISOString(),
+      started: false,
       broadcasts: [{ id: 1, created_at: min(50), team_code: null, kind: "message", sender: "Operator Arco", voice: "operator", body: "Kickoff in five minutes." }],
       teams: [
         { code: "K7M2QX", name: "The Gravy Boats", level: "agent", lockCode: "4821", tracking: true, createdAt: min(70),
@@ -124,6 +126,10 @@
       },
       async send(body, sender, voice, code) { push({ team_code: code || null, kind: "message", sender, voice, body }); },
       async throwSwitch() { push({ team_code: null, kind: "switch", sender: "Operator Arco", voice: "operator", body: "Master switch thrown." }); },
+      async setStarted(on) {
+        st.started = on;
+        if (on) push({ team_code: null, kind: "start", sender: "Operator Arco", voice: "operator", body: "Station ARCO to all agents. The mission is live. Start your route. Over." });
+      },
     };
   }
 
@@ -195,6 +201,15 @@
           </section>
         </div>
         <aside class="gm-side">
+          <section class="card start-card">
+            <h2>Game day</h2>
+            <p id="start-state" class="help"></p>
+            <div class="stack-sm">
+              <a class="btn" href="briefing.html" target="_blank" rel="noopener">Show the briefing on the TV</a>
+              <button class="btn primary" data-act="start" id="start-btn">Start the game</button>
+            </div>
+            <p class="error" id="start-msg"></p>
+          </section>
           <section class="card">
             <h2>Send a transmission</h2>
             <form class="form" id="send">
@@ -259,6 +274,17 @@
     to.innerHTML = `<option value="">Every family</option>` + teams.map((t) => `<option value="${esc(t.code)}">${esc(t.name)} (${esc(t.code)})</option>`).join("");
     to.value = teams.some((t) => t.code === pick) ? pick : "";
 
+    // Game start
+    const startMsg = data.broadcasts.find((b) => b.kind === "start");
+    $("#start-state").textContent = data.started
+      ? `Started${startMsg ? " at " + clock(startMsg.created_at) : ""}. Phones are on their routes.`
+      : `Not started. ${teams.length} ${teams.length === 1 ? "family is" : "families are"} signed up and waiting on the countdown screen.`;
+    const sb = $("#start-btn");
+    if (!sb.classList.contains("armed")) {
+      sb.textContent = data.started ? "Put phones back on the waiting screen" : "Start the game";
+      sb.className = data.started ? "btn" : "btn primary";
+    }
+
     // Switch state
     const sw = data.broadcasts.find((b) => b.kind === "switch");
     $("#switch-state").textContent = sw ? `Thrown at ${clock(sw.created_at)}.` : "";
@@ -268,7 +294,7 @@
     // Log
     $("#log").innerHTML = data.broadcasts.map((b) => {
       const who = b.team_code ? (team(b.team_code) || { name: b.team_code }).name : "Everyone";
-      const what = b.kind === "switch" ? "Master switch thrown" : b.kind === "family_clue" ? "Family clue sent" : esc(b.body);
+      const what = b.kind === "switch" ? "Master switch thrown" : b.kind === "family_clue" ? "Family clue sent" : b.kind === "start" ? "Game started" : esc(b.body);
       return `<li class="${esc(b.voice)}"><div class="log-meta">${esc(clock(b.created_at))} · ${esc(b.sender)} → ${esc(who)}</div><div>${what}</div></li>`;
     }).join("") || `<li class="muted">Nothing sent yet.</li>`;
 
@@ -464,10 +490,36 @@
     }
   }
 
+  // Two clicks, like the master switch, so a slip can't start (or un-start) the game.
+  let startArm = null;
+  async function onStart(btn) {
+    const msg = $("#start-msg");
+    const starting = !data.started;
+    if (!btn.classList.contains("armed")) {
+      btn.classList.add("armed");
+      btn.textContent = starting ? "Click again to start the game on every phone" : "Click again to send every phone back to waiting";
+      startArm = setTimeout(() => { btn.classList.remove("armed"); render(); }, 6000);
+      return;
+    }
+    clearTimeout(startArm);
+    btn.classList.remove("armed");
+    btn.disabled = true;
+    try {
+      await api.setStarted(starting);
+      flash(msg, starting ? "Started. Every phone now shows Start your route." : "Phones are back on the waiting screen.");
+      await load();
+    } catch (err) {
+      flash(msg, err.message, true);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
   function onClick(e) {
     const act = e.target.closest("[data-act]");
     if (act) {
       const a = act.dataset.act;
+      if (a === "start") return onStart(act);
       if (a === "refresh") return load();
       if (a === "signout") return api.signOut().then(() => loginView());
       if (a === "switch") return onSwitch(act);

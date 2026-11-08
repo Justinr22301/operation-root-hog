@@ -65,7 +65,13 @@
       familyClue: t.familyClue ? t.familyClue.text : null,
       familyHash: t.familyClue ? answerHash(t.familyClue.answer) : null,
       solves: t.solves || {},
+      started: demoStarted(),
     };
+  }
+
+  // Demo mode keeps the game-start switch on this phone too.
+  function demoStarted() {
+    try { return localStorage.getItem("roothog.demo.started") === "true"; } catch (e) { return false; }
   }
 
   class DemoBackend {
@@ -120,6 +126,9 @@
     }
     testBroadcast(detail) {
       window.dispatchEvent(new CustomEvent("roothog:broadcast", { detail }));
+    }
+    setStarted(on) {
+      try { localStorage.setItem("roothog.demo.started", on ? "true" : "false"); } catch (e) { /* blocked */ }
     }
   }
 

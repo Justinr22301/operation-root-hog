@@ -211,6 +211,48 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; max-width: 30rem; width: calc(100% - 40px); background: var(--lava); color: var(--paper); padding: 12px 16px; border-radius: var(--radius); font-size: 16px; }
 .toast.good { background: var(--sign-blue); }
 
+/* Waiting for game day */
+.countdown { font: 800 44px/1.05 var(--sans); color: var(--sign-blue); margin: 4px 0 8px; }
+.code-card { background: var(--paper); border: 2px solid var(--mortar); border-radius: var(--radius); padding: 14px 16px 4px; margin: 18px 0; text-align: center; }
+.code-card p:first-child { font-weight: 600; margin-bottom: 0; }
+.code-card .code-big { font-size: clamp(26px, 8vw, 40px); white-space: nowrap; }
+
+/* Briefing scenes: a picture per part of the story, narrated one after another */
+.scene { margin: 0 0 4px; border-radius: var(--radius); overflow: hidden; border: 3px solid var(--lava); background: var(--lava); aspect-ratio: 16 / 9; }
+.scene svg, .scene img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.scene.enter { animation: scene-in 0.5s ease-out both; }
+@keyframes scene-in { from { opacity: 0; transform: scale(0.97); } }
+.brief-progress { display: flex; gap: 6px; justify-content: center; margin: 10px 0 0; }
+.brief-progress span { width: 9px; height: 9px; border-radius: 50%; background: var(--mortar); }
+.brief-progress span.on { background: var(--sign-blue); }
+.brief-progress span.here { background: var(--sign-yellow); outline: 2px solid var(--sign-blue); }
+.brief-nav { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin: 16px 0 8px; }
+.brief-nav.solo { grid-template-columns: 1fr; }
+.sound-btn { margin-top: 4px; }
+
+.scene .pop { transform-box: fill-box; transform-origin: center; animation: pop 0.55s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: var(--d, 0s); }
+@keyframes pop { from { opacity: 0; transform: scale(0.4); } }
+.scene .rise { animation: rise 0.9s ease-out both; animation-delay: var(--d, 0s); }
+@keyframes rise { from { opacity: 0; transform: translateY(40px); } }
+.scene .blink { animation: blink 1.1s steps(1) infinite; animation-delay: var(--d, 0s); }
+.scene .flicker { animation: flicker 0.35s steps(2) infinite; }
+@keyframes flicker { 50% { opacity: 0.1; transform: translateY(6px); } }
+.scene .wave { transform-box: view-box; transform-origin: 160px 60px; animation: wave 2.4s ease-out infinite; animation-delay: var(--d, 0s); opacity: 0; }
+@keyframes wave { from { opacity: 0.9; transform: scale(0.5); } to { opacity: 0; transform: scale(2.2); } }
+.scene .slam { animation: slam 0.45s ease-in both; animation-delay: var(--d, 0s); }
+@keyframes slam { from { opacity: 0; transform: translate(258px, 52px) scale(2.6); } to { opacity: 1; transform: translate(258px, 52px) scale(1); } }
+.scene .light-off { fill: #3a3633; animation: lights-out 1s steps(1) both; animation-delay: var(--d, 0s); }
+@keyframes lights-out { 0% { fill: var(--sign-yellow); } 30% { fill: #3a3633; } 45% { fill: var(--sign-yellow); } 60%, 100% { fill: #3a3633; } }
+.scene .dusk { opacity: 0.7; animation: dusk 2.6s ease-in both; animation-delay: 1s; }
+@keyframes dusk { from { opacity: 0; } }
+.scene .light-on { fill: var(--sign-yellow); animation: lights-on 0.8s steps(1) both; animation-delay: var(--d, 0s); }
+@keyframes lights-on { 0% { fill: #2b2724; } 40% { fill: var(--sign-yellow); } 55% { fill: #2b2724; } 75%, 100% { fill: var(--sign-yellow); } }
+.scene .lamp-on { fill: var(--sign-yellow); stroke: var(--sign-blue); animation: lamp-on 0.5s ease-out both; animation-delay: var(--d, 0s); }
+@keyframes lamp-on { from { fill: #d2cdc3; stroke: #a9a397; } }
+.scene .throw { transform-box: fill-box; transform-origin: 50% 100%; transform: rotate(40deg); animation: throw 0.6s cubic-bezier(.5, 0, .3, 1.4) both; animation-delay: var(--d, 0s); }
+@keyframes throw { from { transform: rotate(-40deg); } }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+  .scene .wave { opacity: 0.5; }
 }

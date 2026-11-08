@@ -60,6 +60,13 @@ create table if not exists broadcasts (
   payload     jsonb
 );
 
+-- 'start' tells waiting phones the game master started the game.
+alter table broadcasts drop constraint if exists broadcasts_kind_check;
+alter table broadcasts add constraint broadcasts_kind_check check (kind in ('message', 'switch', 'family_clue', 'start'));
+
+-- Families register ahead of time; their phones wait until the game master starts the game.
+insert into game_settings (key, value) values ('started', 'false') on conflict (key) do nothing;
+
 create table if not exists locations (
   id        bigint generated always as identity primary key,
   team_id   uuid not null references teams (id) on delete cascade,
@@ -130,6 +137,11 @@ begin
   return candidate;
 end $$;
 
+create or replace function game_started() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce((select value = 'true' from game_settings where key = 'started'), false)
+$$;
+
 -- What a phone is allowed to know about its own team.
 create or replace function team_json(t teams) returns jsonb
 language sql stable security definer set search_path = public, extensions as $$
@@ -145,7 +157,8 @@ language sql stable security definer set search_path = public, extensions as $$
     'solves', coalesce((
       select jsonb_object_agg(s.relay_id, jsonb_build_object('hints', s.hints, 'map', s.map_used, 'juniorFirstTry', s.junior_first_try))
       from solves s where s.team_id = t.id), '{}'::jsonb),
-    'digits', left(t.lock_code, ((select count(*) from solves s where s.team_id = t.id) / 2)::int)
+    'digits', left(t.lock_code, ((select count(*) from solves s where s.team_id = t.id) / 2)::int),
+    'started', game_started()
   )
 $$;
 
@@ -336,6 +349,7 @@ begin
   perform gm_require();
   return jsonb_build_object(
     'now', now(),
+    'started', game_started(),
     'teams', coalesce((
       select jsonb_agg(x.j order by x.restored desc, x.score desc, x.name)
       from (
@@ -396,6 +410,18 @@ begin
   perform send_broadcast(trim(p_body), coalesce(nullif(trim(p_sender), ''), 'Operator Arco'), p_voice, nullif(upper(trim(p_team_code)), ''));
 end $$;
 
+-- Starts the game on every phone (or, with false, puts phones back on the waiting screen, e.g. after a dry run).
+create or replace function gm_set_game_started(p_started boolean) returns void
+language plpgsql volatile security definer set search_path = public, extensions as $$
+begin
+  perform gm_require();
+  update game_settings set value = case when p_started then 'true' else 'false' end where key = 'started';
+  if p_started then
+    insert into broadcasts (kind, sender, voice, body)
+    values ('start', 'Operator Arco', 'operator', 'Station ARCO to all agents. The mission is live. Start your route. Over.');
+  end if;
+end $$;
+
 create or replace function gm_throw_master_switch() returns void
 language plpgsql volatile security definer set search_path = public, extensions as $$
 begin
@@ -415,3 +441,4 @@ grant execute on function gm_state() to authenticated;
 grant execute on function gm_set_family_clue(text, text, text) to authenticated;
 grant execute on function gm_send_broadcast(text, text, text, text) to authenticated;
 grant execute on function gm_throw_master_switch() to authenticated;
+grant execute on function gm_set_game_started(boolean) to authenticated;

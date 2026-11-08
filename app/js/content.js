@@ -6,37 +6,82 @@ window.GAME = {
   title: "Operation Root Hog",
   hq: "Arco Rec Center",
 
-  kickoff: {
-    where: "Meet at the Arco Rec Center and look up at the sign over the door.",
-    clue: "The Bad Guys' broadcast says Arco sits at 5,309 feet. The sign above you says something different. Enter the elevation on the sign.",
-    hint: "It's on the bottom line of the white panel.",
+  // Families sign up ahead of time; their phones count down to this date and wait for the game master to start.
+  gameDay: {
+    date: "2026-11-26",
+    where: "See you Thanksgiving morning, Thursday, November 26, at the Arco Rec Center.",
   },
 
+  // The briefing plays as scenes: a picture (see js/scenes.js) with narration under it.
+  // With sound on, each scene is read aloud and the next one starts when it finishes.
+  // image: "img/file.jpg" swaps the drawing for a photo. audio: "audio/file.mp3" swaps the phone's voice for a recording.
   briefing: [
     {
+      scene: "badguys",
       voice: "badguys",
       from: "The Bad Guys",
-      audio: null, // e.g. "audio/hijack.mp3"
+      audio: null,
       text:
         "Breaking in on this frequency. This is the Bad Guys, calling every so-called agent in the Lost River Valley.\n\n" +
-        "Remember us? You took our turkey in 2024. This year we're taking the whole town.\n\n" +
+        "Remember us? You took our turkey in 2024. This year we're taking the whole town.",
+    },
+    {
+      scene: "blackout",
+      voice: "badguys",
+      from: "The Bad Guys",
+      audio: null,
+      text:
         "Before it was Arco, this place was called Root Hog. Fitting, because today we root out every last light. " +
         "At noon, with every turkey in town in the oven, we cut the power. No ovens, no pie, no Peace Summit.\n\n" +
         "We've jammed every relay in the valley. Good luck finding them.\n\nBad Guys out.",
     },
     {
+      scene: "station",
       voice: "operator",
       from: "Operator Arco",
-      audio: null, // e.g. "audio/briefing.mp3"
+      audio: null,
+      text: "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\nThat was the Bad Guys. Here's what you need to know.",
+    },
+    {
+      scene: "gobbles",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
       text:
-        "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\n" +
-        "That was the Bad Guys. Some of you met them in 2024. In Operation Feather Recovery they snatched Ambassador Gobbles, " +
-        "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it.\n\n" +
+        "Some of you met them in 2024. In Operation Feather Recovery they snatched Ambassador Gobbles, " +
+        "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it.",
+    },
+    {
+      scene: "summit",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
+      text:
         "This year Ambassador Gobbles is chairing the Thanksgiving Peace Summit right here in Arco. " +
-        "The Bad Guys want to ruin it, and they want you to know they're back.\n\n" +
+        "The Bad Guys want to ruin it, and they want you to know they're back.",
+    },
+    {
+      scene: "count",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
+      text:
         "This town is named for Count Georg von Arco, a German radio pioneer who never set foot in Idaho. " +
-        "Legend says he sent a gift to the town that carried his name: eight radio relays hidden around the valley. " +
-        "In 1955, when Arco became the first town lit by atomic power, those relays carried the signal.\n\n" +
+        "Legend says he sent a gift to the town that carried his name: eight radio relays hidden around the valley.",
+    },
+    {
+      scene: "atom1955",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
+      text: "In 1955, when Arco became the first town lit by atomic power, those relays carried the signal.",
+    },
+    {
+      scene: "mission",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
+      text:
         "Today the Bad Guys have jammed every one. Restore your relays. Every two you bring back give you one digit of your family's code. " +
         "When every family has its code, we throw the master switch together.\n\n" +
         "Report in at every relay. Station ARCO, over and out.",

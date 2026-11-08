@@ -15,6 +15,7 @@
   }
 
   function stop() {
+    playId++;
     current.forEach((n) => {
       try { n.stop(); } catch (e) { /* already stopped */ }
     });
@@ -112,28 +113,49 @@
     junior: { pitch: 1.1, rate: 0.88 },
   };
 
-  function speak(text, voice = "operator") {
+  // Each new sound bumps this, so a stopped or replaced voice never reports "done".
+  let playId = 0;
+
+  // Reads text aloud. Long text is spoken a sentence or two at a time, because some browsers
+  // cut off a single long utterance. onDone runs once, after the last piece finishes.
+  function speak(text, voice = "operator", onDone) {
     if (!window.speechSynthesis) return false;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    const my = ++playId;
     const v = VOICES[voice] || VOICES.operator;
-    u.pitch = v.pitch;
-    u.rate = v.rate;
-    u.lang = "en-US";
-    window.speechSynthesis.speak(u);
+    const pieces = String(text).replace(/\n+/g, " ").match(/[^.!?]+[.!?]+["')]*\s*|[^.!?]+$/g) || [String(text)];
+    const chunks = [];
+    for (const p of pieces) {
+      if (chunks.length && (chunks[chunks.length - 1] + p).length < 160) chunks[chunks.length - 1] += p;
+      else chunks.push(p);
+    }
+    chunks.forEach((c, i) => {
+      const u = new SpeechSynthesisUtterance(c.trim());
+      u.pitch = v.pitch;
+      u.rate = v.rate;
+      u.lang = "en-US";
+      if (i === chunks.length - 1) {
+        const finish = () => { if (my === playId && onDone) onDone(); };
+        u.onend = finish;
+        u.onerror = finish;
+      }
+      window.speechSynthesis.speak(u);
+    });
     return true;
   }
 
   let fileAudio = null;
-  // Plays a recorded file if one is set, otherwise reads the text aloud.
-  function play(file, text, voice) {
+  // Plays a recorded file if one is set, otherwise reads the text aloud. onDone runs when it finishes.
+  function play(file, text, voice, onDone) {
     stop();
     if (file) {
+      const my = ++playId;
       fileAudio = new Audio(file);
-      fileAudio.play().catch(() => speak(text, voice));
-      return;
+      fileAudio.onended = () => { if (my === playId && onDone) onDone(); };
+      fileAudio.play().catch(() => speak(text, voice, onDone));
+      return true;
     }
-    speak(text, voice);
+    return speak(text, voice, onDone);
   }
 
   window.GAMEAUDIO = { ensure, stop, staticBurst, morse, chime, buzz, speak, play };

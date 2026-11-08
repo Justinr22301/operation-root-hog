@@ -35,6 +35,9 @@ select:focus { border-color: var(--sign-blue); outline: none; }
 .btn.danger { color: var(--paper); background: var(--atom-red); border-color: var(--atom-red); }
 .btn.danger.armed { background: var(--lava); border-color: var(--lava); color: var(--sign-yellow); }
 .switch-card { border-color: var(--atom-red); }
+.start-card { border-color: var(--sign-blue); }
+.stack-sm { display: grid; gap: 10px; margin: 8px 0; }
+.btn.armed { background: var(--lava); border-color: var(--lava); color: var(--sign-yellow); }
 
 /* Family table */
 .table-wrap { overflow-x: auto; margin: 0 -4px; }

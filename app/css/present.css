@@ -1,0 +1,35 @@
+/* The briefing on a big TV: dark room, big picture, big words. Sized from the screen, so it fills any TV or laptop. */
+body.present { background: #161412; color: #f6dc7a; margin: 0; overflow: hidden; }
+#present { height: 100vh; height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; padding: 2.2vh 3vw; gap: 2vh; box-sizing: border-box; }
+
+.p-top { display: flex; justify-content: space-between; align-items: center; font: 600 clamp(14px, 1.6vw, 28px) var(--mono); color: #d9d0b3; }
+.p-top strong { font-family: var(--sans); font-weight: 800; color: var(--sign-yellow); letter-spacing: 0.04em; }
+.p-dots { display: flex; gap: 0.7vw; }
+.p-dots span { width: 1vw; height: 1vw; min-width: 10px; min-height: 10px; border-radius: 50%; background: #4a4541; }
+.p-dots span.on { background: var(--sign-yellow); opacity: 0.55; }
+.p-dots span.here { background: var(--sign-yellow); }
+
+.p-stage { display: grid; grid-template-columns: 1.35fr 1fr; gap: 3vw; align-items: center; min-height: 0; }
+.p-stage .scene { aspect-ratio: 16 / 9; width: 100%; max-height: 100%; margin: 0; border-width: 0.4vw; border-color: #3a3633; box-shadow: 0 0 6vw rgba(242, 195, 24, 0.12); }
+.p-words { border-left: 0.7vw solid var(--sign-yellow); padding-left: 2vw; }
+.p-words.badguys { border-left-color: var(--atom-red); }
+.p-from { font: 600 clamp(14px, 1.5vw, 30px) var(--mono); color: #d9d0b3; margin: 0 0 1.6vh; }
+.p-text { font: 400 clamp(18px, 2.15vw, 46px)/1.45 var(--mono); }
+.p-text p { margin: 0 0 1.4vh; }
+.p-text.typing::after { content: "\2588"; animation: blink 1s steps(1) infinite; }
+
+.p-bar { display: flex; justify-content: space-between; align-items: center; gap: 2vw; font: 400 clamp(12px, 1.1vw, 22px) var(--sans); color: #8d8478; }
+.p-bar .btn { width: auto; min-height: 0; padding: 0.9vh 1.6vw; font-size: clamp(14px, 1.3vw, 26px); }
+.p-bar .btns { display: flex; gap: 1vw; }
+
+/* Start and end cards */
+.p-card { grid-row: 1 / -1; align-self: center; justify-self: center; text-align: center; max-width: 70vw; }
+.p-card h1 { font-size: clamp(32px, 5vw, 110px); color: var(--sign-yellow); margin: 2vh 0; }
+.p-card p { font-size: clamp(16px, 1.8vw, 38px); color: #d9d0b3; }
+.p-card .btn { width: auto; display: inline-flex; font-size: clamp(18px, 2vw, 40px); padding: 2vh 4vw; min-height: 0; margin-top: 3vh; }
+.p-card .plate { max-width: 40vw; margin: 0 auto; }
+
+@media (max-aspect-ratio: 4/3) {
+  .p-stage { grid-template-columns: 1fr; align-content: center; }
+  .p-text { font-size: clamp(18px, 3.4vw, 44px); }
+}

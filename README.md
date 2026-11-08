@@ -43,6 +43,13 @@ then visit http://localhost:8000. Settings has demo tools: show answers, send a 
 4. Set `demoTools: false` in `config.js` before game day.
 5. Free Supabase projects pause after a week with no activity. Open the app the day before the game.
 
+## Game day flow
+
+1. Families sign up ahead of time. Their phones show a countdown to November 26 and their team code.
+2. On the day, open the console's **Show the briefing on the TV** (`briefing.html`) for the whole room.
+3. Press **Start the game** in the console. Every phone switches to "Start your route" (no kickoff code).
+4. Phones can replay the briefing from Settings. For a dry run, **Put phones back on the waiting screen** resets it.
+
 ## Game master console
 
 `gm.html` (for example https://justinr22301.github.io/operation-root-hog/gm.html) shows every family's progress,

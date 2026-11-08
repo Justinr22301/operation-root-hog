@@ -10,6 +10,8 @@
   let S = load();
   let view = { name: "start" };
   let typingTimer = null;
+  let narrate = false; // briefing read aloud scene by scene, turned on by a tap (phones need one before sound)
+  let briefTimer = null;
 
   function load() {
     try {
@@ -19,7 +21,7 @@
     return fresh();
   }
   function fresh() {
-    return { code: null, team: null, progress: {}, kickoffDone: false, briefingDone: false, digits: "", quiz: [], quizDone: false, switchThrown: false, settings: { navigator: true, tracking: false, showAnswers: false }, queue: [] };
+    return { code: null, team: null, started: false, progress: {}, briefingDone: false, digits: "", quiz: [], quizDone: false, switchThrown: false, settings: { navigator: true, tracking: false, showAnswers: false }, queue: [] };
   }
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* ignore */ }
@@ -31,6 +33,12 @@
   const relayById = (id) => (id === "family" ? GAME.family : GAME.relays.find((r) => r.id === id));
   const prog = (id) => (S.progress[id] = S.progress[id] || { stage: "find", hints: 0, map: false, main: false, junior: false, juniorTries: 0, typed: false });
   const allIds = () => S.team.route.concat("family");
+  // Whole days from today to a "YYYY-MM-DD" date, by this phone's calendar.
+  const daysUntil = (ymd) => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    const now = new Date();
+    return Math.round((new Date(y, m - 1, d) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+  };
   // A stop's name stays hidden ("Station 3") until the family taps "We're here".
   const revealed = (id) => id === "family" || (S.progress[id] && S.progress[id].stage !== "find");
   const label = (id) => (revealed(id) ? relayById(id).name : `Station ${S.team.route.indexOf(id) + 1}`);
@@ -70,7 +78,7 @@
 
   function topbar(back) {
     return `<header class="topbar">
-      ${back ? `<button class="link" data-action="board">Relay board</button>` : `<span class="team-name">${esc(S.team.name)}</span>`}
+      ${back ? (S.started ? `<button class="link" data-action="board">Relay board</button>` : `<button class="link" data-action="home">Back</button>`) : `<span class="team-name">${esc(S.team.name)}</span>`}
       <span class="score" aria-label="Score">${score()} points</span>
       <button class="link" data-action="settings" aria-label="Settings">Settings</button>
     </header>`;
@@ -115,8 +123,7 @@
 
   function home() {
     if (!S.team) return go("start");
-    if (!S.kickoffDone) return go("kickoff");
-    if (!S.briefingDone) return go("briefing", { step: 0 });
+    if (!S.started) return go("waiting");
     if (allDone()) return go("finale");
     return go("board");
   }
@@ -176,16 +183,6 @@
       </section>`;
     },
 
-    created() {
-      return `<section class="screen">
-        <h1>You're signed up</h1>
-        <p>Other phones in your car can join with this code.</p>
-        <p class="code-big" aria-label="Team code">${esc(S.code.split("").join(" "))}</p>
-        <p class="help">Write it down. It also shows in Settings.</p>
-        <button class="btn primary" data-action="home">Continue</button>
-      </section>`;
-    },
-
     join() {
       return `<section class="screen">
         <button class="link back" data-action="start">Back</button>
@@ -198,38 +195,43 @@
       </section>`;
     },
 
-    kickoff() {
-      const k = GAME.kickoff;
-      const shown = demoAnswer("kickoff");
-      return `<section class="screen">
+    // Families sign up ahead of time. Their phones wait here until the game master starts the game.
+    waiting() {
+      const days = daysUntil(GAME.gameDay.date);
+      const when = days > 1 ? `${days} days to go` : days === 1 ? "Tomorrow" : days === 0 ? "Today" : "Any minute now";
+      return `${topbar(false)}<section class="screen waiting">
         ${wordmark(true)}
-        <h1>Kickoff</h1>
-        <p class="lede">${esc(k.where)}</p>
-        <div class="clue">
-          <p>${esc(k.clue)}</p>
-          <form id="answer" data-target="kickoff" class="answer">
-            <label class="sr" for="ans">Elevation on the sign</label>
-            <input id="ans" name="answer" inputmode="numeric" autocomplete="off" placeholder="Elevation">
-            <button class="btn primary" type="submit">Unlock the briefing</button>
-          </form>
-          <p class="feedback" role="alert"></p>
-          <details class="hint"><summary>Need a hint?</summary><p>${esc(k.hint)}</p></details>
-          ${shown ? `<p class="demo-answer">Demo answer: ${esc(shown)}</p>` : ""}
+        <h1>You're signed up</h1>
+        <p class="countdown">${esc(when)}</p>
+        <p class="lede">${esc(GAME.gameDay.where)}</p>
+        <div class="code-card">
+          <p>Your team code</p>
+          <p class="code-big" aria-label="Team code">${esc(S.code.split("").join(" "))}</p>
+          <p class="help">Other phones in your family join with this code.</p>
         </div>
+        <p class="help">We'll watch the briefing together first. This screen changes on its own when Operator Arco starts the game.</p>
+        ${backend.kind === "demo" ? `<button class="btn" data-action="demo-start">Start the game (demo)</button>` : ""}
       </section>`;
     },
 
     briefing() {
-      const b = GAME.briefing[view.step];
-      const last = view.step === GAME.briefing.length - 1;
-      return `<section class="screen">
-        <h1>${view.step === 0 ? "Incoming transmission" : "Your briefing"}</h1>
+      const steps = GAME.briefing;
+      const b = steps[view.step];
+      const last = view.step === steps.length - 1;
+      const pic = b.image ? `<img src="${esc(b.image)}" alt="">` : (window.SCENES && SCENES[b.scene]) || "";
+      return `<section class="screen briefing">
+        <h1>${b.voice === "badguys" ? "Incoming transmission" : "Your briefing"}</h1>
+        ${pic ? `<figure class="scene enter">${pic}</figure>` : ""}
+        <div class="brief-progress" role="img" aria-label="Part ${view.step + 1} of ${steps.length}">${steps.map((_, i) => `<span class="${i < view.step ? "on" : i === view.step ? "here" : ""}"></span>`).join("")}</div>
         <div class="radio ${b.voice}">
           <p class="radio-from">From ${esc(b.from)}</p>
           <div class="radio-text" id="radio-text"></div>
-          <button class="btn small on-dark" data-action="listen-briefing">Play out loud</button>
+          <button class="btn small on-dark sound-btn" data-action="brief-sound">${narrate ? "Sound off" : "Play with sound"}</button>
         </div>
-        <button class="btn primary" data-action="${last ? "briefing-done" : "briefing-next"}">${last ? "Start your route" : "Next transmission"}</button>
+        <div class="brief-nav ${view.step === 0 ? "solo" : ""}">
+          ${view.step > 0 ? `<button class="btn" data-action="briefing-back">Back</button>` : ""}
+          <button class="btn primary" data-action="${last ? "briefing-done" : "briefing-next"}">${last ? "Back to the game" : "Next"}</button>
+        </div>
       </section>`;
     },
 
@@ -253,7 +255,7 @@
         </ol>
         <div class="code-slots" aria-label="Your code so far">${digits.map((d) => `<span class="slot ${d.trim() ? "filled" : ""}">${esc(d.trim() || "")}</span>`).join("")}</div>
         <div class="stack">
-          ${nxt ? `<button class="btn primary" data-action="open-relay" data-id="${nxt}">Next: ${esc(label(nxt))}</button>` : ""}
+          ${nxt ? `<button class="btn primary" data-action="open-relay" data-id="${nxt}">${restoredIds().length || Object.keys(S.progress).length ? "Next" : "Start your route"}: ${esc(label(nxt))}</button>` : ""}
           ${familyUnlocked() && !fam ? `<button class="btn" data-action="open-relay" data-id="family">Solve the Family Relay in the car</button>` : ""}
           ${!familyUnlocked() ? `<p class="help">The Family Relay unlocks after ${GAME.family.unlockAfter} relays.</p>` : ""}
           ${allDone() ? `<button class="btn primary" data-action="finale">Head to the substation</button>` : ""}
@@ -339,6 +341,7 @@
         <h1>Settings</h1>
         <p>Team code</p>
         <p class="code-big">${esc(S.code.split("").join(" "))}</p>
+        ${S.started ? `<button class="btn" data-action="watch-briefing">Watch the briefing again</button>` : ""}
         <label class="choice"><input type="checkbox" data-setting="navigator" ${S.settings.navigator ? "checked" : ""}><span>This phone is the navigator's phone. The driver never uses it.</span></label>
         ${S.team.tracking ? `<label class="choice"><input type="checkbox" data-setting="tracking" ${S.settings.tracking ? "checked" : ""}><span>Share this phone's location with the game master.</span></label>` : ""}
         ${CONFIG.demoTools ? `<h2>Demo tools</h2>
@@ -437,6 +440,24 @@
     </section>`;
   }
 
+  // Reads the current briefing scene aloud, then moves on to the next one by itself.
+  function narrateScene() {
+    clearTimeout(briefTimer);
+    const step = view.step;
+    const b = GAME.briefing[step];
+    const still = () => narrate && view.name === "briefing" && view.step === step;
+    const ok = GAMEAUDIO.play(b.audio, b.text, b.voice, () => {
+      if (!still() || step >= GAME.briefing.length - 1) return;
+      briefTimer = setTimeout(() => { if (still()) go("briefing", { step: step + 1 }); }, 1200);
+    });
+    if (ok === false) {
+      narrate = false;
+      const btn = app.querySelector(".sound-btn");
+      if (btn) btn.textContent = "Play with sound";
+      toast("This phone can't read aloud. Tap Next to keep going.");
+    }
+  }
+
   // ---------- after-render hooks ----------
   const AFTER = {
     signup() {
@@ -445,8 +466,18 @@
     },
     briefing() {
       const b = GAME.briefing[view.step];
-      GAMEAUDIO.staticBurst(0.9);
+      const prev = GAME.briefing[view.step - 1];
+      const newSpeaker = !prev || prev.voice !== b.voice;
       typeInto(document.getElementById("radio-text"), b.text);
+      clearTimeout(briefTimer);
+      if (narrate) {
+        const step = view.step;
+        // Static when the speaker changes, then the narrator starts once it clears.
+        if (newSpeaker) GAMEAUDIO.staticBurst(0.9);
+        briefTimer = setTimeout(() => { if (view.name === "briefing" && view.step === step) narrateScene(); }, newSpeaker ? 900 : 300);
+      } else if (newSpeaker) {
+        GAMEAUDIO.staticBurst(0.9);
+      }
     },
     relay() {
       const p = prog(view.id);
@@ -483,15 +514,6 @@
   async function checkMain(target, value) {
     const fb = app.querySelector(".clue .feedback, .feedback");
     if (!normalizeAnswer(value)) { fb.textContent = "Type an answer first."; return; }
-    if (target === "kickoff") {
-      if (answerHash(value) === ANSWER_HASHES.kickoff) {
-        S.kickoffDone = true; save(); GAMEAUDIO.chime();
-        return go("briefing", { step: 0 });
-      }
-      GAMEAUDIO.buzz();
-      fb.textContent = "That's not what the sign says. Look again at the bottom line.";
-      return;
-    }
     const id = view.id;
     const p = prog(id);
     const expected = id === "family" ? S.team.familyHash : ANSWER_HASHES.relays[id].main;
@@ -593,10 +615,11 @@
       S = fresh();
       S.code = team.code;
       S.team = team;
+      S.started = team.started !== false; // an older server without the start switch counts as started
       S.settings.tracking = !!team.tracking;
       save();
       startLive();
-      go("created");
+      home();
     } catch (e) {
       err.textContent = e.offline ? "No signal. Try again when you have a connection." : e.message;
       btn.disabled = false; btn.textContent = "Create our team";
@@ -612,6 +635,7 @@
       S = fresh();
       S.code = team.code;
       S.team = team;
+      S.started = team.started !== false;
       S.digits = team.digits || "";
       S.settings.navigator = false;
       // Bring over relays the team already restored on another phone.
@@ -671,12 +695,21 @@
       S.team.familyClue = t.familyClue;
       S.team.familyHash = t.familyHash;
       if ((t.digits || "").length > (S.digits || "").length) S.digits = t.digits;
+      const started = t.started !== false;
+      const changed = started !== !!S.started;
+      S.started = started;
       save();
+      // Started while this phone was asleep, or put back to waiting after a dry run.
+      if (changed && (view.name === "waiting" || !started)) return home();
       if (view.name === "board") render();
     } catch (e) { /* offline; try again later */ }
   }
 
   function showTransmission(msg) {
+    if (msg.kind === "start") {
+      S.started = true; save();
+      if (view.name === "waiting") home();
+    }
     if (msg.kind === "switch") {
       S.switchThrown = true; save();
       if (allDone()) go("finale");
@@ -713,13 +746,24 @@
       case "signup": return go("signup");
       case "join": return go("join");
       case "home": return home();
-      case "board": return go("board");
+      case "board": return S.started ? go("board") : home();
       case "settings": return go("settings");
       case "finale": return go("finale");
       case "add-agent": return addAgentRow(document.getElementById("agents"));
-      case "listen-briefing": { const b = GAME.briefing[view.step]; return GAMEAUDIO.play(b.audio, b.text, b.voice); }
+      case "brief-sound": {
+        narrate = !narrate;
+        t.textContent = narrate ? "Sound off" : "Play with sound";
+        if (narrate) return narrateScene();
+        clearTimeout(briefTimer);
+        return GAMEAUDIO.stop();
+      }
       case "briefing-next": return go("briefing", { step: view.step + 1 });
-      case "briefing-done": S.briefingDone = true; save(); return go("board");
+      case "briefing-back": return go("briefing", { step: Math.max(0, view.step - 1) });
+      case "briefing-done": narrate = false; S.briefingDone = true; save(); return home();
+      case "watch-briefing": return go("briefing", { step: 0 });
+      case "demo-start":
+        backend.setStarted(true);
+        return backend.testBroadcast({ kind: "start", sender: "Operator Arco", voice: "operator", body: "Station ARCO to all agents. The mission is live. Start your route. Over." });
       case "open-relay": return go("relay", { id });
       case "arrived": prog(view.id).stage = "here"; save(); return render();
       case "show-map": prog(view.id).map = true; save(); return render();
@@ -754,7 +798,7 @@
           : toast("Test transmissions come from the game master console.");
       case "close-overlay": overlay.hidden = true; overlay.innerHTML = ""; GAMEAUDIO.stop(); return;
       case "reset":
-        if (confirmInline(t, "Tap again to erase this phone's game")) { localStorage.removeItem(STORE); localStorage.removeItem("roothog.demo.teams"); S = fresh(); go("start"); }
+        if (confirmInline(t, "Tap again to erase this phone's game")) { localStorage.removeItem(STORE); localStorage.removeItem("roothog.demo.teams"); localStorage.removeItem("roothog.demo.started"); S = fresh(); go("start"); }
         return;
       case "leave":
         if (confirmInline(t, "Tap again to leave the team on this phone")) { localStorage.removeItem(STORE); S = fresh(); go("start"); }
@@ -791,7 +835,14 @@
   });
 
   window.addEventListener("online", () => flushQueue().then(refreshTeam));
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { wakeLock = null; if (["board", "relay"].includes(view.name)) keepAwake(); } });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    wakeLock = null;
+    if (["board", "relay"].includes(view.name)) keepAwake();
+    if (view.name === "waiting") refreshTeam();
+  });
+  // A waiting phone also checks every 30 seconds, in case it missed the live start message.
+  setInterval(() => { if (view.name === "waiting" && !document.hidden) refreshTeam(); }, 30000);
 
   // ---------- boot ----------
   function boot() {
