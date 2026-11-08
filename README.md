@@ -43,7 +43,19 @@ then visit http://localhost:8000. Settings has demo tools: show answers, send a 
 4. Set `demoTools: false` in `config.js` before game day.
 5. Free Supabase projects pause after a week with no activity. Open the app the day before the game.
 
-## Game master tools (SQL editor for now)
+## Game master console
+
+`gm.html` (for example https://justinr22301.github.io/operation-root-hog/gm.html) shows every family's progress,
+padlock code and last location on a map, writes Family Relay clues, sends transmissions and throws the master switch.
+Add `?mock` to try it with made-up families (needs `demoTools: true`).
+
+One-time setup in Supabase:
+1. Re-run `supabase/schema.sql` in the SQL editor (it adds the console's functions and is safe to re-run).
+2. Authentication > Users > Add user: your email and a password, with Auto Confirm on.
+3. In the SQL editor: `insert into gm_allowlist (email) values ('your email in lowercase');`
+4. Optional: Authentication > Sign In / Providers > turn off "Allow new users to sign up". Nobody else needs an account.
+
+## Game master tools in the SQL editor
 
 ```sql
 -- Everyone's progress, scores, padlock codes and last location
@@ -63,7 +75,6 @@ select throw_master_switch();
 select end_of_game_cleanup();
 ```
 
-A game master console page with a map and buttons for all of this is the next piece to build.
 
 ## Recorded audio
 

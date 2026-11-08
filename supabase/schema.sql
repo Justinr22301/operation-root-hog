@@ -311,9 +311,107 @@ language sql volatile security definer set search_path = public as $$
   delete from family_facts;
 $$;
 
+-- ---------- game master console (app/gm.html) ----------
+-- The console signs in with a Supabase Auth email and password. Only emails in gm_allowlist get through.
+-- Add yourself once in the SQL editor (keep the email out of this public file):
+--   insert into gm_allowlist (email) values ('you@example.com');
+create table if not exists gm_allowlist (
+  email text primary key check (email = lower(email))
+);
+alter table gm_allowlist enable row level security;
+revoke all on gm_allowlist from anon, authenticated;
+
+create or replace function gm_require() returns void
+language plpgsql stable security definer set search_path = public, extensions as $$
+begin
+  if not exists (select 1 from gm_allowlist where email = lower(coalesce(auth.jwt() ->> 'email', ''))) then
+    raise exception 'This account is not a game master.';
+  end if;
+end $$;
+
+-- Everything the console shows, in one call.
+create or replace function gm_state() returns jsonb
+language plpgsql stable security definer set search_path = public, extensions as $$
+begin
+  perform gm_require();
+  return jsonb_build_object(
+    'now', now(),
+    'teams', coalesce((
+      select jsonb_agg(x.j order by x.restored desc, x.score desc, x.name)
+      from (
+        select
+          t.name,
+          (select count(*) from solves s where s.team_id = t.id) as restored,
+          (select coalesce(sum(100 - 25 * s.hints - case when s.map_used then 25 else 0 end + case when s.junior_first_try then 25 else 0 end), 0)
+             from solves s where s.team_id = t.id) as score,
+          jsonb_build_object(
+            'code', t.code,
+            'name', t.name,
+            'level', t.level,
+            'agents', t.agents,
+            'route', to_jsonb(t.route),
+            'lockCode', t.lock_code,
+            'tracking', t.tracking,
+            'familyClue', t.family_clue,
+            'familyAnswer', t.family_answer,
+            'facts', coalesce((select f.facts from family_facts f where f.team_id = t.id), '{}'::jsonb),
+            'createdAt', t.created_at,
+            'restored', (select count(*) from solves s where s.team_id = t.id),
+            'score', (select coalesce(sum(100 - 25 * s.hints - case when s.map_used then 25 else 0 end + case when s.junior_first_try then 25 else 0 end), 0)
+                        from solves s where s.team_id = t.id),
+            'solves', coalesce((
+              select jsonb_object_agg(s.relay_id, jsonb_build_object('at', s.solved_at, 'hints', s.hints, 'map', s.map_used, 'juniorFirstTry', s.junior_first_try))
+              from solves s where s.team_id = t.id), '{}'::jsonb),
+            'location', (
+              select jsonb_build_object('lat', l.lat, 'lng', l.lng, 'accuracy', l.accuracy, 'at', l.at)
+              from locations l where l.team_id = t.id order by l.at desc limit 1)
+          ) as j
+        from teams t
+      ) x), '[]'::jsonb),
+    'broadcasts', coalesce((
+      select jsonb_agg(b order by b.id desc)
+      from (select id, created_at, team_code, kind, sender, voice, body from broadcasts order by id desc limit 40) b), '[]'::jsonb)
+  );
+end $$;
+
+create or replace function gm_set_family_clue(p_code text, p_clue text, p_answer text) returns void
+language plpgsql volatile security definer set search_path = public, extensions as $$
+begin
+  perform gm_require();
+  if coalesce(trim(p_clue), '') = '' or normalize_answer(p_answer) = '' then
+    raise exception 'Write both the clue and its answer.';
+  end if;
+  perform set_family_clue(p_code, trim(p_clue), p_answer);
+end $$;
+
+create or replace function gm_send_broadcast(p_body text, p_sender text, p_voice text, p_team_code text default null) returns void
+language plpgsql volatile security definer set search_path = public, extensions as $$
+begin
+  perform gm_require();
+  if coalesce(trim(p_body), '') = '' then raise exception 'Write a message first.'; end if;
+  if p_voice not in ('operator', 'badguys', 'gobbles', 'junior') then raise exception 'Unknown voice.'; end if;
+  if p_team_code is not null and not exists (select 1 from teams where code = upper(trim(p_team_code))) then
+    raise exception 'No team with code %', p_team_code;
+  end if;
+  perform send_broadcast(trim(p_body), coalesce(nullif(trim(p_sender), ''), 'Operator Arco'), p_voice, nullif(upper(trim(p_team_code)), ''));
+end $$;
+
+create or replace function gm_throw_master_switch() returns void
+language plpgsql volatile security definer set search_path = public, extensions as $$
+begin
+  perform gm_require();
+  perform throw_master_switch();
+end $$;
+
 -- Phones may call only these four.
 revoke execute on all functions in schema public from public, anon, authenticated;
 grant execute on function create_team(text, text, jsonb, jsonb, boolean, text[]) to anon, authenticated;
 grant execute on function join_team(text) to anon, authenticated;
 grant execute on function record_solve(text, text, text, text, int, boolean, boolean) to anon, authenticated;
 grant execute on function post_location(text, double precision, double precision, real) to anon, authenticated;
+
+-- The console's functions: signed-in accounts only, and each one checks gm_allowlist.
+grant execute on function gm_state() to authenticated;
+grant execute on function gm_set_family_clue(text, text, text) to authenticated;
+grant execute on function gm_send_broadcast(text, text, text, text) to authenticated;
+grant execute on function gm_throw_master_switch() to authenticated;
