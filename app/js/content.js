@@ -25,9 +25,8 @@ window.GAME = {
       {
         heading: "Operation Feather Recovery, 2024",
         text:
-          "Right before Thanksgiving 2024, the Bad Guys snatched Ambassador Gobbles. Families became agents for the day. " +
-          "They cracked a code in German, found a clue hidden in Granny and Gramps' wedding year, " +
-          "and followed the trail until Gobbles was home safe in time for dinner.",
+          "Right before Thanksgiving 2024, the Bad Guys snatched Ambassador Gobbles. Families became agents for the day, " +
+          "tracked down the clues the Bad Guys left behind, cracked every code, and freed Gobbles in time for dinner.",
       },
       {
         heading: "Why they're back",

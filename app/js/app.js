@@ -151,7 +151,7 @@
           <div style="--i:1"><dt>What</dt><dd>Your family drives between real places in Arco and Moore, cracking clues to bring Station ARCO's radio relays back on.</dd></div>
           <div style="--i:2"><dt>Who</dt><dd>Everyone in the car. Junior agents get puzzles of their own.</dd></div>
         </dl>
-        <p class="help">Sign up once per family. One phone per car is enough; the others can join with your team code.</p>
+        <p class="help">Sign up once per family. After that, anyone else in your family can join the same team on their own phone with your team code, and every phone follows the family's progress.</p>
         <div class="stack">
           <button class="btn primary" data-action="signup">Sign up your family</button>
           <button class="btn" data-action="join">Join your family's team</button>
@@ -662,10 +662,7 @@
       S.started = team.started !== false;
       S.digits = team.digits || "";
       S.settings.navigator = false;
-      // Bring over relays the team already restored on another phone.
-      Object.keys(team.solves || {}).forEach((id) => {
-        S.progress[id] = { stage: "restored", hints: team.solves[id].hints || 0, map: !!team.solves[id].map, main: true, junior: true, juniorTries: 1, juniorFirstTry: !!team.solves[id].juniorFirstTry, typed: true };
-      });
+      mergeSolves(team.solves);
       save();
       startLive();
       home();
@@ -712,6 +709,18 @@
   }
 
   // Picks up a family clue or digits that arrived while this phone had no signal.
+  // Brings over relays the family restored on another phone. Returns true if anything new arrived.
+  function mergeSolves(solves) {
+    let added = false;
+    Object.keys(solves || {}).forEach((id) => {
+      if (S.progress[id] && S.progress[id].stage === "restored") return;
+      const s = solves[id];
+      S.progress[id] = { stage: "restored", hints: s.hints || 0, map: !!s.map, main: true, junior: true, juniorTries: 1, juniorFirstTry: !!s.juniorFirstTry, typed: true };
+      added = true;
+    });
+    return added;
+  }
+
   async function refreshTeam() {
     if (backend.kind !== "supabase" || !S.code) return;
     try {
@@ -719,13 +728,15 @@
       S.team.familyClue = t.familyClue;
       S.team.familyHash = t.familyHash;
       if ((t.digits || "").length > (S.digits || "").length) S.digits = t.digits;
+      const newSolves = mergeSolves(t.solves);
       const started = t.started !== false;
       const changed = started !== !!S.started;
       S.started = started;
       save();
       // Started while this phone was asleep, or put back to waiting after a dry run.
       if (changed && (view.name === "waiting" || !started)) return home();
-      if (view.name === "board") render();
+      if (newSolves && allDone() && view.name !== "finale") return go("finale");
+      if (view.name === "board" || (newSolves && view.name === "relay" && S.progress[view.id] && S.progress[view.id].stage === "restored")) render();
     } catch (e) { /* offline; try again later */ }
   }
 
@@ -882,10 +893,10 @@
     if (document.visibilityState !== "visible") return;
     wakeLock = null;
     if (["board", "relay"].includes(view.name)) keepAwake();
-    if (view.name === "waiting") refreshTeam();
+    if (S.code) refreshTeam();
   });
-  // A waiting phone also checks every 30 seconds, in case it missed the live start message.
-  setInterval(() => { if (view.name === "waiting" && !document.hidden) refreshTeam(); }, 30000);
+  // Every 30 seconds, catch up: the start of the game, and relays restored on the family's other phones.
+  setInterval(() => { if (S.code && !document.hidden && view.name !== "start") refreshTeam(); }, 30000);
 
   // ---------- boot ----------
   function boot() {
