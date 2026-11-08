@@ -114,7 +114,7 @@
     if (here !== step || !sound) return;
     const b = steps[here];
     GAMEAUDIO.play(b.audio, b.text, b.voice, () => {
-      if (here === step && sound) timer = setTimeout(() => show(step + 1), 1500);
+      if (here === step && sound) timer = setTimeout(() => show(step + 1), b.cut ? 0 : 1500);
     });
   }
 

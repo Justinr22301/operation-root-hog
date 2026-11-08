@@ -50,6 +50,17 @@ window.GAME = {
       text: "Incoming transmission. All agents, stand by.",
     },
     {
+      scene: "summit",
+      voice: "operator",
+      from: "Operator Arco",
+      audio: null,
+      cut: true, // the Bad Guys break in mid-sentence: no pause before the next scene
+      text:
+        "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\n" +
+        "Big day in Arco. Ambassador Gobbles is here to chair the Thanksgiving Peace Summit, " +
+        "and every family in the valley is invited. The summit opens at noon, and the pies are already in the",
+    },
+    {
       scene: "badguys",
       voice: "badguys",
       from: "The Bad Guys",
@@ -73,7 +84,7 @@ window.GAME = {
       voice: "operator",
       from: "Operator Arco",
       audio: null,
-      text: "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\nThat was the Bad Guys. Here's what you need to know.",
+      text: "Station ARCO, back on the air. Agents, do you copy?\n\nThat was the Bad Guys. Here's what you need to know.",
     },
     {
       scene: "gobbles",
@@ -82,16 +93,8 @@ window.GAME = {
       audio: null,
       text:
         "Some of you met them in 2024. In Operation Feather Recovery they snatched Ambassador Gobbles, " +
-        "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it.",
-    },
-    {
-      scene: "summit",
-      voice: "operator",
-      from: "Operator Arco",
-      audio: null,
-      text:
-        "This year Ambassador Gobbles is chairing the Thanksgiving Peace Summit right here in Arco. " +
-        "The Bad Guys want to ruin it, and they want you to know they're back.",
+        "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it. " +
+        "Now they want to ruin his summit.",
     },
     {
       scene: "count",
@@ -99,7 +102,7 @@ window.GAME = {
       from: "Operator Arco",
       audio: null,
       text:
-        "This town is named for Count Georg von Arco, a German radio pioneer who never set foot in Idaho. " +
+        "Here's what they don't know. This town is named for Count Georg von Arco, a German radio pioneer who never set foot in Idaho. " +
         "Legend says he sent a gift to the town that carried his name: eight radio relays hidden around the valley.",
     },
     {

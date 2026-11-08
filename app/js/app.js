@@ -471,7 +471,7 @@
     const still = () => narrate && view.name === "briefing" && view.step === step;
     const ok = GAMEAUDIO.play(b.audio, b.text, b.voice, () => {
       if (!still()) return;
-      briefTimer = setTimeout(() => { if (still()) go("briefing", { step: step + 1 }); }, 1200);
+      briefTimer = setTimeout(() => { if (still()) go("briefing", { step: step + 1 }); }, b.cut ? 0 : 1200);
     });
     if (ok === false) {
       narrate = false;
