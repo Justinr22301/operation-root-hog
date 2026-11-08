@@ -326,15 +326,16 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
   50% { transform: translate(6px, -3px) skewX(-5deg); filter: hue-rotate(110deg) saturate(3) drop-shadow(-6px 0 0 #f00); clip-path: inset(30% 0 0 0); }
   100% { transform: translate(0, 5px); filter: invert(0.15) contrast(2); clip-path: inset(12% 0 18% 0); }
 }
-.hijack-noise { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; z-index: 2; pointer-events: none; animation: noise-in 1.4s linear both; }
-@keyframes noise-in { 0% { opacity: 0; } 15% { opacity: 0.45; } 30% { opacity: 0.1; } 45% { opacity: 0.7; } 55% { opacity: 0.3; } 70%, 100% { opacity: 1; } }
+/* Timed for the 3.4 second hijack in scenes.js */
+.hijack-noise { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; z-index: 2; pointer-events: none; animation: noise-in 3.4s linear both; }
+@keyframes noise-in { 0% { opacity: 0; } 7% { opacity: 0.45; } 12% { opacity: 0.1; } 20% { opacity: 0.65; } 26% { opacity: 0.25; } 36% { opacity: 0.8; } 60% { opacity: 0.6; } 66% { opacity: 0.9; } 85%, 100% { opacity: 1; } }
 .hijack-label {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-3deg); z-index: 3;
   background: var(--atom-red); color: #fff; font: 800 clamp(14px, 3.2vw, 56px)/1 var(--sans); letter-spacing: 0.08em;
   padding: 0.45em 0.9em; white-space: nowrap; box-shadow: 0 0 30px rgba(224, 40, 30, 0.8);
-  animation: label-flash 1.4s steps(1) both;
+  animation: label-flash 3.4s steps(1) both;
 }
-@keyframes label-flash { 0%, 34% { opacity: 0; } 35%, 47% { opacity: 1; } 48%, 54% { opacity: 0; } 55%, 100% { opacity: 1; } }
+@keyframes label-flash { 0%, 14% { opacity: 0; } 15%, 21% { opacity: 1; } 22%, 25% { opacity: 0; } 26%, 58% { opacity: 1; } 59%, 61% { opacity: 0; } 62%, 100% { opacity: 1; } }
 .hijack-frame { border-left-color: var(--atom-red) !important; transition: border-color 0.1s 0.4s; }
 /* The Bad Guys' feed rolls in like a TV losing its vertical hold. */
 .scene.enter.roll { animation: roll-in 0.7s steps(7) both; }
@@ -359,6 +360,12 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .scene .knob { transform-box: view-box; transform-origin: 0 0; animation: knob 3.4s cubic-bezier(.6, 0, .3, 1) both; }
 @keyframes knob { 0% { transform: rotate(-120deg); } 35% { transform: rotate(110deg); } 60% { transform: rotate(-20deg); } 100% { transform: rotate(30deg); } }
 .scene .knob-2 { animation-duration: 2.2s; animation-delay: 1.2s; }
+
+/* Station ARCO back on the air: beacon glow and signal rings */
+.scene .beacon { transform-box: fill-box; transform-origin: center; animation: beacon 1.2s ease-in-out infinite; }
+@keyframes beacon { 50% { opacity: 0.25; transform: scale(0.6); } }
+.scene .ping { transform-box: fill-box; transform-origin: center; opacity: 0; animation: ping 2.7s ease-out infinite; animation-delay: var(--d, 0s); }
+@keyframes ping { 0% { opacity: 0.85; transform: scale(0.5); } 100% { opacity: 0; transform: scale(6); } }
 
 /* Bad Guys */
 .scene .sweep { animation: sweep 3s ease-in-out infinite; }
@@ -385,9 +392,9 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 @keyframes drop-in { from { opacity: 0; transform: translateY(-30px) rotate(-6deg); } }
 .scene .type-in { animation: type-in 0.6s steps(6) both; animation-delay: var(--d, 0s); }
 @keyframes type-in { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
-.scene .light-off { fill: #3a3633; animation: lights-out 1s steps(1) both; animation-delay: var(--d, 0s); }
+.scene .light-off { fill: #3a3633; animation: lights-out 1.4s steps(1) both; animation-delay: var(--d, 0s); }
 @keyframes lights-out { 0% { fill: var(--sign-yellow); } 30% { fill: #3a3633; } 45% { fill: var(--sign-yellow); } 60%, 100% { fill: #3a3633; } }
-.scene .dusk { opacity: 0.7; animation: dusk 2.6s ease-in both; animation-delay: 1s; }
+.scene .dusk { opacity: 0.7; animation: dusk 6s ease-in both; animation-delay: 1s; }
 @keyframes dusk { from { opacity: 0; } }
 .scene .light-on { fill: var(--sign-yellow); animation: lights-on 0.8s steps(1) both; animation-delay: var(--d, 0s); }
 @keyframes lights-on { 0% { fill: #2b2724; } 40% { fill: var(--sign-yellow); } 55% { fill: #2b2724; } 75%, 100% { fill: var(--sign-yellow); } }

@@ -13,3 +13,6 @@ test-shots/
 
 # Dev notes list answers; keep local
 CLAUDE.md
+
+# Full-size art originals; the app uses the .webp copies
+app/img/*.png

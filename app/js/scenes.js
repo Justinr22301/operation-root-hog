@@ -77,7 +77,8 @@
       <ellipse cx="160" cy="177" rx="150" ry="9" fill="#000" opacity=".45"/>
       <g class="glitch"><g class="rise"><g class="breathe">
         <image href="img/badguys.webp" x="31" y="8" width="258" height="172"/>
-        ${[[63, 71, 2.2], [107, 52.5, 2.6], [160, 35.7, 1.6], [219, 45.8, 3.1], [262, 70, 3.6]]
+        ${/* eye spots measured on the picture: 31 + x * 0.2867, 8 + y * 0.2867 */ ""}
+        ${[[63.1, 71.1, 2.2], [103.5, 53.9, 2.6], [158.9, 30.9, 1.6], [217.3, 45.6, 3.1], [259.5, 74.8, 3.6]]
           .map(([x, y, t]) => `<g class="glint" style="--d:${t}s" fill="${RED}"><rect x="${x - 4}" y="${y}" width="3" height="1.1" rx=".5"/><rect x="${x + 1}" y="${y}" width="3" height="1.1" rx=".5"/></g>`)
           .join("")}
       </g></g></g>
@@ -91,7 +92,7 @@
       <rect width="320" height="180" fill="#9fb3c8"/>
       <rect width="320" height="180" fill="#2d3340" class="dusk"/>
       <path d="M0 130 Q60 92 120 116 T240 104 T320 112 V180 H0z" fill="#6f665c"/>
-      ${town(164, "light-off", 1.2, 0.18)}
+      ${town(164, "light-off", 1.5, 0.55)}
       <rect y="164" width="320" height="16" fill="#1d1b19"/>
       <g transform="translate(276 38)">
         <circle r="24" fill="${LIME}" stroke="${LAVA}" stroke-width="3"/>
@@ -105,21 +106,17 @@
 
     // Station ARCO calling.
     station: `<svg viewBox="0 0 320 180" role="img" aria-label="The Station ARCO radio tower">
-      <rect width="320" height="180" fill="#dfe7ef"/>
-      <path d="M0 150 Q80 112 160 136 T320 124 V180 H0z" fill="#8d8478"/>
-      <path d="M0 166 Q90 150 180 162 T320 156 V180 H0z" fill="#6f665c"/>
-      ${[0, 0.8, 1.6].map((t) => `<g class="wave" ${d(t)} fill="none" stroke="${BLUE}" stroke-width="3"><path d="M128 40 A40 40 0 0 1 128 80"/><path d="M192 40 A40 40 0 0 0 192 80" /></g>`).join("")}
-      <g stroke="${LAVA}" stroke-width="3" fill="none" stroke-linecap="round">
-        <path d="M160 46 L136 160 M160 46 L184 160"/>
-        <path d="M152 80 L168 80 M146 108 L174 108 M141 134 L179 134"/>
-        <path d="M152 80 L174 108 L141 134 M168 80 L146 108 L179 134"/>
-      </g>
-      <circle cx="160" cy="44" r="6" fill="${RED}" class="blink"/>
-      <g transform="translate(222 112)">
-        <rect x="-2" y="0" width="4" height="40" fill="${LAVA}"/>
-        <rect x="-52" y="-26" width="104" height="30" rx="6" fill="${YEL}" stroke="${BLUE}" stroke-width="3"/>
-        <text y="-6" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="14" fill="${BLUE}">STATION ARCO</text>
-      </g>
+      <defs>
+        <linearGradient id="sc-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe0ee"/><stop offset="1" stop-color="#f1ede2"/></linearGradient>
+        <radialGradient id="sc-beacon"><stop offset="0" stop-color="#ff5a3c" stop-opacity=".9"/><stop offset="1" stop-color="#ff5a3c" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="320" height="180" fill="url(#sc-sky)"/>
+      ${/* station.webp (900 x 594) laid out 272 wide: picture point (x, y) of the 1543 x 1019 original lands at 24 + x * 0.1763, y * 0.1763 */ ""}
+      ${[0, 1, 2].map((i) => `<circle cx="154.5" cy="14.8" r="10" fill="none" stroke="${BLUE}" stroke-width="2" class="ping" style="--d:${i * 0.9}s"/>`).join("")}
+      <g class="rise"><image href="img/station.webp" x="24" y="0" width="272" height="180"/></g>
+      <circle cx="154.5" cy="14.8" r="13" fill="url(#sc-beacon)" class="beacon"/>
+      <circle cx="117.6" cy="127.8" r="2.2" fill="#7cf08a" class="blink" style="--d:.3s"/>
+      <circle cx="117.6" cy="133.1" r="2.2" fill="${YEL}" class="blink" style="--d:.9s"/>
     </svg>`,
 
     // Ambassador Gobbles' 2024 case file: his portrait clipped to the Operation Feather Recovery dossier.
@@ -230,7 +227,8 @@
   window.hijack = function (fig, text, frame, done) {
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !fig) return done();
-    if (window.GAMEAUDIO) { GAMEAUDIO.stop(); GAMEAUDIO.staticBurst(1.6, 0.3); }
+    const LENGTH = 3400; // ms; the CSS animations in app.css (hijack-noise, hijack-label) are timed to match
+    if (window.GAMEAUDIO) { GAMEAUDIO.stop(); GAMEAUDIO.staticBurst(LENGTH / 1000 + 0.2, 0.3); }
     fig.classList.add("hijack");
     if (frame) frame.classList.add("hijack-frame");
 
@@ -244,7 +242,7 @@
     let raf = 0;
     const frameNoise = (now) => {
       const d = img.data;
-      const red = now - start > 500;
+      const red = now - start > 900;
       for (let i = 0; i < d.length; i += 4) {
         const v = (Math.random() * 255) | 0;
         d[i] = red ? Math.min(255, v + 60) : v; d[i + 1] = red ? v * 0.55 : v; d[i + 2] = red ? v * 0.5 : v; d[i + 3] = 255;
@@ -256,7 +254,7 @@
         ctx.fillStyle = `rgba(0,0,0,${0.3 + Math.random() * 0.4})`;
         ctx.fillRect(0, y, c.width, 2 + Math.random() * 6);
       }
-      if (now - start < 1500) raf = requestAnimationFrame(frameNoise);
+      if (now - start < LENGTH + 100) raf = requestAnimationFrame(frameNoise);
     };
     raf = requestAnimationFrame(frameNoise);
 
@@ -273,16 +271,16 @@
       let k = 0;
       scramble = setInterval(() => {
         k++;
-        text.textContent = orig.replace(/\S/g, (ch) => (Math.random() < k / 9 ? glyphs[(Math.random() * glyphs.length) | 0] : ch));
-        if (k >= 12) clearInterval(scramble);
-      }, 90);
+        text.textContent = orig.replace(/\S/g, (ch) => (Math.random() < k / 16 ? glyphs[(Math.random() * glyphs.length) | 0] : ch));
+        if (k >= 26) clearInterval(scramble);
+      }, 120);
     }
 
     setTimeout(() => {
       cancelAnimationFrame(raf);
       clearInterval(scramble);
       done();
-    }, 1400);
+    }, LENGTH);
   };
 
   // The evidence board: every briefing picture as a tilted, red-framed card, like photos pinned up after a mission.
