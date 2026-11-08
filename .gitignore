@@ -1,0 +1,15 @@
+# Private: plaintext answers. Keep these on your computer only; the repo is public.
+tools/answers.json
+supabase/seed.sql
+supabase/setup.sql
+app/js/demo-answers.js
+
+# Local clutter
+node_modules/
+__pycache__/
+.DS_Store
+Thumbs.db
+test-shots/
+
+# Dev notes list answers; keep local
+CLAUDE.md
