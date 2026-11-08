@@ -45,11 +45,12 @@
     return out;
   }
 
-  // Ambassador Gobbles' portrait (img/gobbles.webp), cropped by a viewBox on the 800x800 picture.
-  // crop is "x y w h" in picture pixels; his head sits around (420, 180).
-  const portrait = (x, y, w, h, crop, cls = "kb") =>
+  // A picture from img/, cropped by a viewBox. crop is "x y w h" in the picture's own pixels.
+  // gobbles.webp is 700 x 766 (head near 362, 134); count.webp is 600 x 705; council.webp is 1000 x 563.
+  const SIZES = { gobbles: [700, 766], count: [600, 705], council: [1000, 563] };
+  const picture = (name, x, y, w, h, crop, cls = "") =>
     `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${crop}" preserveAspectRatio="xMidYMid slice">` +
-    `<image href="img/gobbles.webp" width="800" height="800" class="${cls}"/></svg>`;
+    `<image href="img/${name}.webp" width="${SIZES[name][0]}" height="${SIZES[name][1]}" class="${cls}"/></svg>`;
 
   const SCENES = {
     // The opening: Station ARCO's radio tuning in.
@@ -136,7 +137,8 @@
       <g class="drop-in" ${d(0.2)}>
         <g transform="translate(46 22) rotate(-4)">
           <rect x="-7" y="-7" width="132" height="150" fill="#f7f3ea" stroke="#d8cfbd"/>
-          <g clip-path="url(#sc-photo)">${portrait(0, 0, 118, 118, "230 40 380 380")}</g>
+          <rect width="118" height="118" fill="#cfe0ee"/>
+          <g clip-path="url(#sc-photo)">${picture("gobbles", 0, 0, 118, 118, "70 0 600 600", "kb")}</g>
           <text x="59" y="134" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="9" fill="${LAVA}">AMBASSADOR GOBBLES</text>
           <path d="M96 -14 v22 q0 6 -6 6 q-6 0 -6 -6 v-18 q0 -3 3 -3 q3 0 3 3 v16" fill="none" stroke="#a7acb1" stroke-width="2.2" stroke-linecap="round"/>
         </g>
@@ -160,43 +162,24 @@
 
     // The Thanksgiving Peace Summit, with Gobbles in the chair.
     summit: `<svg viewBox="0 0 320 180" role="img" aria-label="Ambassador Gobbles chairing the Thanksgiving Peace Summit">
-      <defs><clipPath id="sc-oval"><ellipse cx="160" cy="84" rx="40" ry="46"/></clipPath>
-        <linearGradient id="sc-hall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ede0"/><stop offset="1" stop-color="#ddd3c0"/></linearGradient></defs>
+      <defs><linearGradient id="sc-hall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ede0"/><stop offset="1" stop-color="#ddd3c0"/></linearGradient></defs>
       <rect width="320" height="180" fill="url(#sc-hall)"/>
       ${[20, 70, 250, 300].map((x) => `<rect x="${x - 6}" y="0" width="12" height="130" fill="#e6dccb"/><rect x="${x - 9}" y="0" width="18" height="6" fill="#d2c6b0"/>`).join("")}
-      <g transform="translate(160 22)" class="drop-in">
-        <rect x="-138" y="-14" width="276" height="28" rx="5" fill="${BLUE}"/>
-        ${atom(-120, 0, 8, YEL)}${atom(120, 0, 8, YEL)}
-        <text y="5" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="12" fill="${YEL}">THANKSGIVING PEACE SUMMIT</text>
+      <g transform="translate(160 14)" class="drop-in">
+        <rect x="-128" y="-10" width="256" height="20" rx="4" fill="${BLUE}"/>
+        ${atom(-114, 0, 6, YEL)}${atom(114, 0, 6, YEL)}
+        <text y="4" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${YEL}">THANKSGIVING PEACE SUMMIT</text>
       </g>
-      <g class="pop" ${d(0.5)}>
-        <ellipse cx="160" cy="84" rx="45" ry="51" fill="#c9a24a"/>
-        <ellipse cx="160" cy="84" rx="42" ry="48" fill="#8a6a22"/>
-        <g clip-path="url(#sc-oval)">${portrait(118, 36, 84, 96, "255 25 340 390", "")}</g>
-        <rect x="128" y="128" width="64" height="12" rx="2" fill="#c9a24a"/>
-        <text x="160" y="137" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="7" fill="${LAVA}">CHAIR</text>
-      </g>
-      ${[[40, "#7a8f5a", 0.9], [86, "#b5651d", 1.05], [234, "#6a5d8f", 1.2], [280, "#3f7f86", 1.35]]
-        .map(([x, c, t]) => `<g class="pop" ${d(t)}><circle cx="${x}" cy="112" r="12" fill="#e3c3a6" stroke="${LAVA}" stroke-width="2"/><path d="M${x - 19} 146 Q${x - 18} 126 ${x} 126 Q${x + 18} 126 ${x + 19} 146z" fill="${c}" stroke="${LAVA}" stroke-width="2"/></g>`)
-        .join("")}
-      <rect x="10" y="144" width="300" height="12" rx="3" fill="#8b5a36" stroke="${LAVA}" stroke-width="2"/>
-      <path d="M22 156 V180 M298 156 V180" stroke="${LAVA}" stroke-width="5"/>
-      <g transform="translate(64 140)"><path d="M-12 4 L12 4 L9 -3 L-9 -3z" fill="#d9822b" stroke="${LAVA}" stroke-width="1.5"/><path d="M-9 -3 Q0 -10 9 -3" fill="#f0c27a" stroke="${LAVA}" stroke-width="1.5"/></g>
-      <g transform="translate(258 138)"><rect x="-12" y="2" width="18" height="4" rx="2" fill="#5a3a22"/><rect x="2" y="-5" width="7" height="11" rx="2" fill="#5a3a22"/></g>
+      <g class="rise" ${d(0.3)}>${picture("council", 14, 28, 292, 152, "0 30 1000 520", "kb-gentle")}</g>
     </svg>`,
 
     // Count Georg von Arco and his legendary relays.
     count: `<svg viewBox="0 0 320 180" role="img" aria-label="Count Georg von Arco and eight relays around the valley">
       <rect width="320" height="180" fill="${LIME}"/>
-      <g transform="translate(70 76)">
-        <ellipse rx="52" ry="64" fill="#c9a24a"/><ellipse rx="45" ry="57" fill="#f6efe0"/>
-        <g fill="${LAVA}">
-          <path d="M-36 52 Q-34 14 0 10 Q34 14 36 52z"/>
-          <ellipse cx="0" cy="-12" rx="18" ry="22"/>
-          <path d="M-18 -20 Q-16 -40 0 -38 Q16 -40 18 -20 Q10 -30 0 -28 Q-10 -30 -18 -20z"/>
-          <path d="M-14 0 Q-6 -6 0 -2 Q6 -6 14 0 Q6 2 0 0 Q-6 2 -14 0z" fill="#f6efe0"/>
-        </g>
-        <path d="M-8 22 L0 34 L8 22" fill="#f6efe0"/>
+      <defs><clipPath id="sc-count"><ellipse cx="70" cy="76" rx="45" ry="57"/></clipPath></defs>
+      <g class="pop">
+        <ellipse cx="70" cy="76" rx="52" ry="64" fill="#c9a24a"/><ellipse cx="70" cy="76" rx="45" ry="57" fill="#efe4cc"/>
+        <g clip-path="url(#sc-count)">${picture("count", 25, 19, 90, 114, "40 0 520 660", "kb-face")}</g>
       </g>
       <text x="70" y="157" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">COUNT GEORG VON ARCO</text>
       <text x="70" y="169" text-anchor="middle" font-family="Overpass Mono, monospace" font-size="9" fill="#5a5550">1869–1940</text>
@@ -251,13 +234,13 @@
   // The evidence board: every briefing picture as a tilted, red-framed card, like photos pinned up after a mission.
   // Spots are left %, top %, tilt in degrees, for up to 9 cards in a loose 3 x 3.
   const SPOTS = [[1, 9, -7], [35, 2, 4], [68, 8, -3], [4, 39, 5], [36, 36, -4], [67, 41, 6], [2, 70, -3], [34, 68, 5], [66, 72, -6]];
-  const picture = (b) => (b.image ? `<img src="${b.image}" alt="">` : SCENES[b.scene] || "");
-  window.scenePicture = picture;
+  const scenePicture = (b) => (b.image ? `<img src="${b.image}" alt="">` : SCENES[b.scene] || "");
+  window.scenePicture = scenePicture;
   window.evidenceBoard = function (list, title = "Mission Briefing") {
     return `<div class="board"><h2 class="board-title">${title}</h2><div class="collage">${list
       .map((b, i) => {
         const [x, y, r] = SPOTS[i % SPOTS.length];
-        return `<div class="ev" style="--x:${x}%;--y:${y}%;--r:${r}deg;--i:${i}">${picture(b)}</div>`;
+        return `<div class="ev" style="--x:${x}%;--y:${y}%;--r:${r}deg;--i:${i}">${scenePicture(b)}</div>`;
       })
       .join("")}</div></div>`;
   };

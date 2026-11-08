@@ -142,7 +142,7 @@
         ${wordmark(false)}
         <p class="intercept"><span>Intercepted transmission</span>The Bad Guys are back, and this Thanksgiving they're after Arco's lights.</p>
         <figure class="poster">
-          <div class="poster-photo"><img src="img/gobbles.webp" alt="Ambassador Gobbles in his dress uniform, with sash and medals"></div>
+          <div class="poster-photo"><img src="img/gobbles.webp" alt="Ambassador Gobbles, a turkey in a top hat and a blue sash, waving"></div>
           <figcaption><strong>Ambassador Gobbles</strong> is counting on you.</figcaption>
         </figure>
         <button class="link backstory-link" data-action="backstory">Who are the Bad Guys? What happened in 2024?</button>

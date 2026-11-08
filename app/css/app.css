@@ -229,8 +229,8 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
   animation: fade-up 0.6s 0.6s both;
 }
 .poster { max-width: 300px; margin-left: auto !important; margin-right: auto !important; }
-.poster-photo { aspect-ratio: 5 / 4; overflow: hidden; background: var(--lava); }
-.poster-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; transform-origin: 52% 24%; animation: kb-head 10s ease-in-out infinite alternate; }
+.poster-photo { aspect-ratio: 5 / 4; overflow: hidden; background: radial-gradient(circle at 55% 35%, #fbf3dc, #e9c766 70%, #c99a2e); }
+.poster-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 0; transform-origin: 52% 18%; animation: kb-head 10s ease-in-out infinite alternate; }
 @keyframes kb-head { from { transform: scale(1); } to { transform: scale(1.12); } }
 .poster figcaption {
   position: absolute; left: 0; right: 0; bottom: 0; padding: 44px 14px 10px;
@@ -255,7 +255,7 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .backstory h3 { margin: 0 0 4px; font-size: 18px; color: var(--sign-blue); }
 .backstory section p { margin: 0; }
 .backstory-gobbles { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: center; background: var(--paper); border: 2px solid var(--mortar); border-radius: var(--radius); padding: 10px; margin: 0 0 18px; }
-.backstory-gobbles img { width: 84px; height: 84px; object-fit: cover; object-position: 52% 16%; border-radius: 8px; }
+.backstory-gobbles img { width: 84px; height: 84px; object-fit: cover; object-position: 55% 0; border-radius: 8px; background: #f3e3b3; }
 .backstory-gobbles strong { display: block; color: var(--sign-blue); }
 
 /* Waiting for game day */
@@ -340,7 +340,10 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 @keyframes glitch { 0%, 86%, 100% { transform: none; opacity: 1; } 88% { transform: translateX(-5px); opacity: 0.7; } 90% { transform: translateX(4px) skewX(-6deg); } 92% { transform: translateX(-2px); opacity: 0.85; } }
 
 /* Gobbles' case file */
-.scene .kb { transform-box: fill-box; transform-origin: 52% 24%; animation: kb 12s ease-out both; }
+.scene .kb { transform-box: fill-box; transform-origin: 52% 18%; animation: kb 12s ease-out both; }
+.scene .kb-face { transform-box: fill-box; transform-origin: 50% 30%; animation: kb 14s ease-out both; }
+.scene .kb-gentle { transform-box: fill-box; transform-origin: 50% 30%; animation: kb-gentle 16s ease-out both; }
+@keyframes kb-gentle { from { transform: scale(1.06); } to { transform: scale(1); } }
 @keyframes kb { from { transform: scale(1); } to { transform: scale(1.14); } }
 .scene .kb-slow { transform-box: fill-box; transform-origin: 50% 40%; animation: kb 20s linear both; }
 .scene .drop-in { animation: drop-in 0.7s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: var(--d, 0s); }
