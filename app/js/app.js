@@ -137,9 +137,21 @@
   // ---------- screens ----------
   const SCREENS = {
     start() {
+      const days = daysUntil(GAME.gameDay.date);
       return `<section class="screen start">
         ${wordmark(false)}
-        <p class="lede">A Thanksgiving morning mission through Arco and Moore. One phone per car is enough. Every family needs its own team.</p>
+        <p class="intercept"><span>Intercepted transmission</span>The Bad Guys are back, and this Thanksgiving they're after Arco's lights.</p>
+        <figure class="poster">
+          <div class="poster-photo"><img src="img/gobbles.webp" alt="Ambassador Gobbles in his dress uniform, with sash and medals"></div>
+          <figcaption><strong>Ambassador Gobbles</strong> is counting on you.</figcaption>
+        </figure>
+        <button class="link backstory-link" data-action="backstory">Who are the Bad Guys? What happened in 2024?</button>
+        <dl class="mission-facts">
+          <div style="--i:0"><dt>When</dt><dd>Thanksgiving morning, Thursday, November 26${days > 0 ? ` (${days === 1 ? "tomorrow" : `${days} days away`})` : ""}. We start together at the Arco Rec Center.</dd></div>
+          <div style="--i:1"><dt>What</dt><dd>Your family drives between real places in Arco and Moore, cracking clues to bring Station ARCO's radio relays back on.</dd></div>
+          <div style="--i:2"><dt>Who</dt><dd>Everyone in the car. Junior agents get puzzles of their own.</dd></div>
+        </dl>
+        <p class="help">Sign up once per family. One phone per car is enough; the others can join with your team code.</p>
         <div class="stack">
           <button class="btn primary" data-action="signup">Sign up your family</button>
           <button class="btn" data-action="join">Join your family's team</button>
@@ -216,8 +228,19 @@
 
     briefing() {
       const steps = GAME.briefing;
+      if (view.step >= steps.length) {
+        // After the last scene: everything from the briefing, pinned up as evidence.
+        return `<section class="screen briefing">
+          ${evidenceBoard(steps)}
+          <p class="lede">That's the whole briefing, agents. Every relay you restore gets the town closer to lights on.</p>
+          <div class="brief-nav">
+            <button class="btn" data-action="briefing-back">Back</button>
+            <button class="btn primary" data-action="briefing-done">Back to the game</button>
+          </div>
+        </section>`;
+      }
       const b = steps[view.step];
-      const last = view.step === steps.length - 1;
+      const last = false;
       const pic = b.image ? `<img src="${esc(b.image)}" alt="">` : (window.SCENES && SCENES[b.scene]) || "";
       return `<section class="screen briefing">
         <h1>${b.voice === "badguys" ? "Incoming transmission" : "Your briefing"}</h1>
@@ -447,7 +470,7 @@
     const b = GAME.briefing[step];
     const still = () => narrate && view.name === "briefing" && view.step === step;
     const ok = GAMEAUDIO.play(b.audio, b.text, b.voice, () => {
-      if (!still() || step >= GAME.briefing.length - 1) return;
+      if (!still()) return;
       briefTimer = setTimeout(() => { if (still()) go("briefing", { step: step + 1 }); }, 1200);
     });
     if (ok === false) {
@@ -466,6 +489,7 @@
     },
     briefing() {
       const b = GAME.briefing[view.step];
+      if (!b) return; // the evidence board
       const prev = GAME.briefing[view.step - 1];
       const newSpeaker = !prev || prev.voice !== b.voice;
       typeInto(document.getElementById("radio-text"), b.text);
@@ -705,6 +729,24 @@
     } catch (e) { /* offline; try again later */ }
   }
 
+  // The front page's "What happened in 2024?" pop-up.
+  function showBackstory() {
+    const s = GAME.backstory;
+    overlay.innerHTML = `<div class="overlay-inner backstory" role="dialog" aria-modal="true" aria-labelledby="bs-title">
+      <div class="backstory-head">
+        <img src="img/dossier.webp" alt="">
+        <h2 id="bs-title">${esc(s.title)}</h2>
+      </div>
+      ${s.sections.map((x, i) => `<section style="--i:${i}"><h3>${esc(x.heading)}</h3><p>${esc(x.text)}</p></section>`).join("")}
+      <div class="backstory-gobbles"><img src="img/gobbles.webp" alt="Ambassador Gobbles"><p><strong>Ambassador Gobbles</strong>Rescued 2024. Chairing the 2026 Peace Summit.</p></div>
+      <button class="btn primary" data-action="close-overlay">Close the file</button>
+    </div>`;
+    overlay.hidden = false;
+    overlay.scrollTop = 0;
+    overlay.querySelector("h2").setAttribute("tabindex", "-1");
+    overlay.querySelector("h2").focus();
+  }
+
   function showTransmission(msg) {
     if (msg.kind === "start") {
       S.started = true; save();
@@ -761,6 +803,7 @@
       case "briefing-back": return go("briefing", { step: Math.max(0, view.step - 1) });
       case "briefing-done": narrate = false; S.briefingDone = true; save(); return home();
       case "watch-briefing": return go("briefing", { step: 0 });
+      case "backstory": return showBackstory();
       case "demo-start":
         backend.setStarted(true);
         return backend.testBroadcast({ kind: "start", sender: "Operator Arco", voice: "operator", body: "Station ARCO to all agents. The mission is live. Start your route. Over." });

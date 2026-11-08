@@ -12,10 +12,43 @@ window.GAME = {
     where: "See you Thanksgiving morning, Thursday, November 26, at the Arco Rec Center.",
   },
 
+  // "What happened in 2024?" on the front page. Edit freely; it's only story.
+  backstory: {
+    title: "The case file",
+    sections: [
+      {
+        heading: "Who are the Bad Guys?",
+        text:
+          "Nobody has seen their faces. They work from the shadows, they talk big over the radio, " +
+          "and they can't stand a holiday that brings families together.",
+      },
+      {
+        heading: "Operation Feather Recovery, 2024",
+        text:
+          "Right before Thanksgiving 2024, the Bad Guys snatched Ambassador Gobbles. Families became agents for the day. " +
+          "They cracked a code in German, found a clue hidden in Granny and Gramps' wedding year, " +
+          "and followed the trail until Gobbles was home safe in time for dinner.",
+      },
+      {
+        heading: "Why they're back",
+        text:
+          "The Bad Guys never got over losing. This year Ambassador Gobbles is chairing the Thanksgiving Peace Summit " +
+          "in Arco, and the Bad Guys have a plan for the town's lights. Station ARCO needs every family it can get.",
+      },
+    ],
+  },
+
   // The briefing plays as scenes: a picture (see js/scenes.js) with narration under it.
   // With sound on, each scene is read aloud and the next one starts when it finishes.
   // image: "img/file.jpg" swaps the drawing for a photo. audio: "audio/file.mp3" swaps the phone's voice for a recording.
   briefing: [
+    {
+      scene: "radio",
+      voice: "operator",
+      from: "Station ARCO",
+      audio: null,
+      text: "Incoming transmission. All agents, stand by.",
+    },
     {
       scene: "badguys",
       voice: "badguys",

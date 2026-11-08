@@ -8,6 +8,15 @@
   let sound = true;
   let timer = null;
   let typing = null;
+  const collected = []; // scenes already shown, kept as evidence
+
+  // The small pile of captured evidence in the corner; the newest card drops onto it.
+  function pile(newest) {
+    const shown = collected.slice(-4);
+    return `<div class="p-pile" aria-hidden="true">${shown
+      .map((s, k) => `<div class="ev mini ${s === newest ? "new" : ""}" style="--r:${[-9, 6, -4, 8][k % 4]}deg">${scenePicture(steps[s])}</div>`)
+      .join("")}</div><span class="p-count">${collected.length ? `Evidence collected: ${collected.length}` : ""}</span>`;
+  }
 
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const para = (s) => String(s).split(/\n\n+/).map((p) => `<p>${esc(p)}</p>`).join("");
@@ -31,7 +40,37 @@
     clearTimeout(timer);
     clearTimeout(typing);
     GAMEAUDIO.stop();
+    // Moving forward: the scene we're leaving becomes evidence and flies to the pile.
+    const leaving = root.querySelector(".p-stage .scene");
+    let fly = null;
+    let newest = null;
+    if (leaving && n === step + 1 && step >= 0) {
+      if (!collected.includes(step)) collected.push(step);
+      newest = step;
+      fly = { el: leaving.cloneNode(true), from: leaving.getBoundingClientRect() };
+    }
     step = Math.max(-1, Math.min(steps.length, n));
+    render(newest);
+    if (fly && !reduceMotion && step < steps.length) flyToPile(fly);
+  }
+
+  function flyToPile({ el, from }) {
+    const target = root.querySelector(".p-pile");
+    if (!target || !el.animate) return;
+    const to = target.getBoundingClientRect();
+    el.classList.remove("enter");
+    el.style.cssText = `position:fixed;left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px;margin:0;z-index:50;pointer-events:none`;
+    document.body.appendChild(el);
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+    const s = to.width / from.width;
+    el.animate(
+      [{ transform: "none", opacity: 1 }, { transform: `translate(${dx}px, ${dy}px) scale(${s}) rotate(-10deg)`, opacity: 0.85 }],
+      { duration: 650, easing: "cubic-bezier(.5, 0, .3, 1)" }
+    ).onfinish = () => el.remove();
+  }
+
+  function render(newest) {
     if (step === -1) {
       root.innerHTML = `<section class="p-card">${plate}<h1>Mission briefing</h1>
         <p>Turn the sound up. Operator Arco will take it from here.</p>
@@ -40,9 +79,10 @@
       return;
     }
     if (step === steps.length) {
-      root.innerHTML = `<section class="p-card">${plate}<h1>Stand by, agents</h1>
+      root.innerHTML = `<section class="p-end">${evidenceBoard(steps)}
+        <div class="p-end-words"><h1>Stand by, agents</h1>
         <p>Your phones will light up when Operator Arco starts the game.</p>
-        <p class="help" style="margin-top:3vh"><button class="link" data-act="restart" style="color:#d9d0b3">Play it again</button></p></section>`;
+        <button class="link" data-act="restart">Play it again</button></div></section>`;
       return;
     }
     const b = steps[step];
@@ -53,7 +93,7 @@
         <figure class="scene enter">${pic}</figure>
         <div class="p-words ${esc(b.voice)}"><p class="p-from">From ${esc(b.from)}</p><div class="p-text" id="p-text"></div></div>
       </div>
-      <footer class="p-bar"><span>Part ${step + 1} of ${steps.length}</span>
+      <footer class="p-bar"><div class="p-evidence">${pile(newest)}</div>
         <div class="btns">
           <button class="btn" data-act="back">Back</button>
           <button class="btn" data-act="sound">${sound ? "Pause voice" : "Play voice"}</button>
@@ -98,7 +138,7 @@
     GAMEAUDIO.ensure();
     const act = a.dataset.act;
     if (act === "begin") { sound = true; fullScreen(); return show(0); }
-    if (act === "restart") return show(-1);
+    if (act === "restart") { collected.length = 0; return show(-1); }
     if (act === "next") return show(step + 1);
     if (act === "back") return show(step - 1);
     if (act === "sound") return toggleSound(a);

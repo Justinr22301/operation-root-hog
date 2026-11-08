@@ -211,6 +211,52 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 30; max-width: 30rem; width: calc(100% - 40px); background: var(--lava); color: var(--paper); padding: 12px 16px; border-radius: var(--radius); font-size: 16px; }
 .toast.good { background: var(--sign-blue); }
 
+/* Front page */
+.start .plate { animation: sign-drop 0.7s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes sign-drop { from { opacity: 0; transform: translateY(-24px); } }
+.start .plate-top .atom { animation: spin 14s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.intercept {
+  background: var(--lava); color: #f6dc7a; font: 400 17px/1.5 var(--mono);
+  border-left: 8px solid var(--atom-red); border-radius: var(--radius); padding: 12px 14px; margin: 0 0 18px;
+  animation: fade-up 0.6s 0.35s both, flicker-in 0.9s 0.35s steps(6) both;
+}
+.intercept span { display: block; font: 600 13px var(--mono); color: #d9d0b3; margin-bottom: 4px; }
+@keyframes flicker-in { 0% { opacity: 0; } 20% { opacity: 1; } 35% { opacity: 0.3; } 50%, 100% { opacity: 1; } }
+.poster {
+  position: relative; margin: 0 0 18px; border-radius: var(--radius); overflow: hidden;
+  border: 4px solid var(--paper); outline: 2px solid var(--mortar); box-shadow: 0 8px 18px rgba(45, 42, 39, 0.22);
+  animation: fade-up 0.6s 0.6s both;
+}
+.poster-photo { aspect-ratio: 4 / 3; overflow: hidden; background: var(--lava); }
+.poster-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; transform-origin: 52% 24%; animation: kb-head 10s ease-in-out infinite alternate; }
+@keyframes kb-head { from { transform: scale(1); } to { transform: scale(1.12); } }
+.poster figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 44px 14px 10px;
+  background: linear-gradient(transparent, rgba(22, 20, 18, 0.7) 40%, rgba(22, 20, 18, 0.94)); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); color: var(--paper); font-size: 17px; line-height: 1.3;
+}
+.poster figcaption strong { display: block; font-size: 22px; font-weight: 800; color: var(--sign-yellow); }
+.mission-facts { margin: 0 0 14px; display: grid; gap: 10px; }
+.mission-facts div { display: grid; grid-template-columns: 4.2rem 1fr; gap: 10px; animation: fade-up 0.5s both; animation-delay: calc(0.85s + var(--i) * 0.15s); }
+.mission-facts dt { font-weight: 800; color: var(--sign-blue); }
+.mission-facts dd { margin: 0; font-size: 17px; }
+.start .stack { animation: fade-up 0.5s 1.4s both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(12px); } }
+
+.backstory-link { display: block; margin: -6px 0 16px; animation: fade-up 0.5s 0.8s both; }
+
+/* "What happened in 2024?" */
+.backstory { animation: fade-up 0.35s both; }
+.backstory-head { position: relative; border-radius: var(--radius); overflow: hidden; margin-bottom: 16px; aspect-ratio: 16 / 7; background: var(--lava); }
+.backstory-head img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; opacity: 0.55; animation: kb-head 14s ease-in-out infinite alternate; }
+.backstory-head h2 { position: absolute; left: 14px; bottom: 10px; margin: 0; color: #fff; font-size: 28px; text-shadow: 2px 2px 0 var(--atom-red), 0 2px 10px rgba(0, 0, 0, 0.8); }
+.backstory section { border-left: 4px solid var(--atom-red); padding: 2px 0 2px 12px; margin: 0 0 16px; animation: fade-up 0.45s both; animation-delay: calc(0.15s + var(--i) * 0.15s); }
+.backstory h3 { margin: 0 0 4px; font-size: 18px; color: var(--sign-blue); }
+.backstory section p { margin: 0; }
+.backstory-gobbles { display: grid; grid-template-columns: 84px 1fr; gap: 12px; align-items: center; background: var(--paper); border: 2px solid var(--mortar); border-radius: var(--radius); padding: 10px; margin: 0 0 18px; }
+.backstory-gobbles img { width: 84px; height: 84px; object-fit: cover; object-position: 52% 16%; border-radius: 8px; }
+.backstory-gobbles strong { display: block; color: var(--sign-blue); }
+
 /* Waiting for game day */
 .countdown { font: 800 44px/1.05 var(--sans); color: var(--sign-blue); margin: 4px 0 8px; }
 .code-card { background: var(--paper); border: 2px solid var(--mortar); border-radius: var(--radius); padding: 14px 16px 4px; margin: 18px 0; text-align: center; }
@@ -218,10 +264,25 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .code-card .code-big { font-size: clamp(26px, 8vw, 40px); white-space: nowrap; }
 
 /* Briefing scenes: a picture per part of the story, narrated one after another */
-.scene { margin: 0 0 4px; border-radius: var(--radius); overflow: hidden; border: 3px solid var(--lava); background: var(--lava); aspect-ratio: 16 / 9; }
-.scene svg, .scene img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.scene.enter { animation: scene-in 0.5s ease-out both; }
-@keyframes scene-in { from { opacity: 0; transform: scale(0.97); } }
+.scene { position: relative; margin: 0 0 4px; border-radius: var(--radius); overflow: hidden; border: 3px solid var(--lava); background: var(--lava); aspect-ratio: 16 / 9; }
+.scene > svg, .scene > img { display: block; width: 100%; height: 100%; object-fit: cover; animation: drift 16s ease-out both; }
+@keyframes drift { from { transform: scale(1.06); } to { transform: scale(1); } }
+/* A faint picture-tube look over every scene: scanlines and darker corners. */
+.scene::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.09) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 58%, rgba(0, 0, 0, 0.38) 100%);
+}
+/* Each new scene tunes in: a flash of static, a flicker, then the picture. */
+.scene.enter { animation: tune-in 0.7s steps(7) both; }
+@keyframes tune-in {
+  0% { opacity: 0; filter: brightness(2.2) contrast(0.4) saturate(0); }
+  30% { opacity: 1; filter: brightness(1.6) contrast(0.6) saturate(0.3); transform: translateX(-3px); }
+  45% { opacity: 0.55; transform: translateX(3px); }
+  60% { opacity: 1; filter: none; transform: none; }
+  100% { opacity: 1; filter: none; }
+}
 .brief-progress { display: flex; gap: 6px; justify-content: center; margin: 10px 0 0; }
 .brief-progress span { width: 9px; height: 9px; border-radius: 50%; background: var(--mortar); }
 .brief-progress span.on { background: var(--sign-blue); }
@@ -240,7 +301,51 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .scene .wave { transform-box: view-box; transform-origin: 160px 60px; animation: wave 2.4s ease-out infinite; animation-delay: var(--d, 0s); opacity: 0; }
 @keyframes wave { from { opacity: 0.9; transform: scale(0.5); } to { opacity: 0; transform: scale(2.2); } }
 .scene .slam { animation: slam 0.45s ease-in both; animation-delay: var(--d, 0s); }
-@keyframes slam { from { opacity: 0; transform: translate(258px, 52px) scale(2.6); } to { opacity: 1; transform: translate(258px, 52px) scale(1); } }
+@keyframes slam { from { opacity: 0; transform: translate(var(--x, 258px), var(--y, 52px)) scale(2.6); } to { opacity: 1; transform: translate(var(--x, 258px), var(--y, 52px)) scale(1); } }
+
+/* Evidence board: the briefing's pictures, pinned up at the end */
+.board { background: #1d1c1b radial-gradient(ellipse at 50% 40%, #2a2826, #151413 75%); border-radius: var(--radius); padding: 14px 10px 18px; margin: 0 0 16px; overflow: hidden; }
+.board-title { text-align: center; color: #fff; font-size: 26px; margin: 0 0 6px; text-shadow: 2px 2px 0 var(--atom-red), 0 0 14px rgba(224, 40, 30, 0.5); }
+.collage { position: relative; aspect-ratio: 16 / 11; }
+.ev {
+  position: absolute; left: var(--x); top: var(--y); width: 31%; aspect-ratio: 16 / 9; overflow: hidden; background: #222;
+  border: 3px solid #e0281e; box-shadow: 0 0 12px rgba(224, 40, 30, 0.65), 0 10px 18px rgba(0, 0, 0, 0.55);
+  transform: rotate(var(--r)); transition: transform 0.25s;
+  animation: ev-in 0.6s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: calc(0.2s + var(--i, 0) * 0.22s);
+}
+.ev:hover { transform: rotate(0deg) scale(1.12); z-index: 5; }
+.ev > svg, .ev > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ev * { animation: none !important; }
+@keyframes ev-in { from { opacity: 0; transform: translateY(-50px) rotate(calc(var(--r) * 4)) scale(1.4); } }
+
+/* Radio */
+.scene .blink-slow { animation: blink 1.6s steps(1) infinite; }
+.scene .pulse { transform-box: fill-box; transform-origin: center; animation: pulse 2.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; transform: scale(0.9); } }
+.scene .wave-scroll { animation: wave-scroll 1.6s linear infinite; }
+@keyframes wave-scroll { to { transform: translateX(-40px); } }
+.scene .wave-amp { transform-box: fill-box; transform-origin: 50% 70%; animation: wave-amp 0.9s ease-in-out infinite alternate; }
+@keyframes wave-amp { from { transform: scaleY(0.35); } to { transform: scaleY(1.1); } }
+.scene .needle { animation: tune 3.4s cubic-bezier(.6, 0, .3, 1) both; }
+@keyframes tune { 0% { transform: translateX(84px); } 35% { transform: translateX(220px); } 60% { transform: translateX(130px); } 78% { transform: translateX(176px); } 100% { transform: translateX(160px); } }
+.scene .knob { transform-box: view-box; transform-origin: 0 0; animation: knob 3.4s cubic-bezier(.6, 0, .3, 1) both; }
+@keyframes knob { 0% { transform: rotate(-120deg); } 35% { transform: rotate(110deg); } 60% { transform: rotate(-20deg); } 100% { transform: rotate(30deg); } }
+.scene .knob-2 { animation-duration: 2.2s; animation-delay: 1.2s; }
+
+/* Bad Guys */
+.scene .sweep { animation: sweep 3s ease-in-out infinite; }
+@keyframes sweep { to { transform: translateX(470px); } }
+.scene .glitch { animation: glitch 4s steps(1) infinite; }
+@keyframes glitch { 0%, 86%, 100% { transform: none; opacity: 1; } 88% { transform: translateX(-5px); opacity: 0.7; } 90% { transform: translateX(4px) skewX(-6deg); } 92% { transform: translateX(-2px); opacity: 0.85; } }
+
+/* Gobbles' case file */
+.scene .kb { transform-box: fill-box; transform-origin: 52% 24%; animation: kb 12s ease-out both; }
+@keyframes kb { from { transform: scale(1); } to { transform: scale(1.14); } }
+.scene .kb-slow { transform-box: fill-box; transform-origin: 50% 40%; animation: kb 20s linear both; }
+.scene .drop-in { animation: drop-in 0.7s cubic-bezier(.3, 1.4, .5, 1) both; animation-delay: var(--d, 0s); }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-30px) rotate(-6deg); } }
+.scene .type-in { animation: type-in 0.6s steps(6) both; animation-delay: var(--d, 0s); }
+@keyframes type-in { from { opacity: 0; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
 .scene .light-off { fill: #3a3633; animation: lights-out 1s steps(1) both; animation-delay: var(--d, 0s); }
 @keyframes lights-out { 0% { fill: var(--sign-yellow); } 30% { fill: #3a3633; } 45% { fill: var(--sign-yellow); } 60%, 100% { fill: #3a3633; } }
 .scene .dusk { opacity: 0.7; animation: dusk 2.6s ease-in both; animation-delay: 1s; }

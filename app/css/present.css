@@ -22,6 +22,22 @@ body.present { background: #161412; color: #f6dc7a; margin: 0; overflow: hidden;
 .p-bar .btn { width: auto; min-height: 0; padding: 0.9vh 1.6vw; font-size: clamp(14px, 1.3vw, 26px); }
 .p-bar .btns { display: flex; gap: 1vw; }
 
+/* Captured evidence: a small pile in the corner that grows scene by scene */
+.p-evidence { display: flex; align-items: center; gap: 1.4vw; }
+.p-pile { position: relative; width: 7vw; min-width: 64px; aspect-ratio: 16 / 9; }
+.p-pile .ev.mini { left: 0; top: 0; width: 100%; border-width: 2px; animation: none; box-shadow: 0 0 8px rgba(224, 40, 30, 0.6), 0 4px 8px rgba(0, 0, 0, 0.6); }
+.p-pile .ev.mini.new { animation: ev-in 0.45s 0.55s cubic-bezier(.3, 1.4, .5, 1) both; }
+.p-count { font: 600 clamp(12px, 1.1vw, 22px) var(--mono); color: #d9d0b3; }
+
+/* The end: every scene pinned to the evidence board */
+.p-end { grid-row: 1 / -1; display: grid; grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr); gap: 3vw; align-items: center; min-height: 0; }
+.p-end .board { background: none; padding: 0; margin: 0; overflow: visible; max-height: 92vh; }
+.p-end .collage { max-height: 80vh; aspect-ratio: 16 / 11; margin: 0 auto; }
+.p-end .board-title { font-size: clamp(28px, 3.6vw, 80px); margin-bottom: 5vh; }
+.p-end-words h1 { font-size: clamp(28px, 3.4vw, 76px); color: var(--sign-yellow); margin: 0 0 2vh; animation: fade-up 0.6s 2.4s both; }
+.p-end-words p { font-size: clamp(16px, 1.6vw, 34px); color: #d9d0b3; animation: fade-up 0.6s 2.6s both; }
+.p-end-words .link { color: #8d8478; font-size: clamp(14px, 1.2vw, 24px); }
+
 /* Start and end cards */
 .p-card { grid-row: 1 / -1; align-self: center; justify-self: center; text-align: center; max-width: 70vw; }
 .p-card h1 { font-size: clamp(32px, 5vw, 110px); color: var(--sign-yellow); margin: 2vh 0; }

@@ -13,27 +13,6 @@
     `<ellipse rx="${r}" ry="${r * 0.38}"/><ellipse rx="${r}" ry="${r * 0.38}" transform="rotate(60)"/><ellipse rx="${r}" ry="${r * 0.38}" transform="rotate(120)"/></g>` +
     `<circle r="${r * 0.2}" fill="${color}"/></g>`;
 
-  // Ambassador Gobbles. cx/cy is the middle of his body; s scales him.
-  function gobbles(cx, cy, s, sash = true) {
-    const feathers = [-75, -50, -25, 0, 25, 50, 75]
-      .map((a, i) => `<ellipse cx="0" cy="-42" rx="13" ry="40" fill="${["#8b4a2b", RED, YEL, "#d9822b"][i % 4]}" stroke="${LAVA}" stroke-width="1.5" transform="rotate(${a})"/>`)
-      .join("");
-    return `<g transform="translate(${cx} ${cy}) scale(${s})">
-      <g transform="translate(0 6)">${feathers}</g>
-      <ellipse cx="0" cy="8" rx="32" ry="36" fill="#6b3e26" stroke="${LAVA}" stroke-width="2"/>
-      ${sash ? `<path d="M-26 -12 L22 34 L30 26 L-18 -20z" fill="${BLUE}"/><circle cx="6" cy="14" r="7" fill="${YEL}" stroke="${LAVA}" stroke-width="1.5"/>` : ""}
-      <path d="M-8 -26 Q0 -40 8 -26 L6 -12 L-6 -12z" fill="#c98f74"/>
-      <circle cx="0" cy="-42" r="15" fill="#e3ab92" stroke="${LAVA}" stroke-width="2"/>
-      <circle cx="-5" cy="-45" r="3.4" fill="#fff"/><circle cx="5" cy="-45" r="3.4" fill="#fff"/>
-      <circle cx="-4.4" cy="-44.6" r="1.7" fill="${LAVA}"/><circle cx="5.6" cy="-44.6" r="1.7" fill="${LAVA}"/>
-      <path d="M-4 -39 L4 -39 L0 -32z" fill="${YEL}" stroke="${LAVA}" stroke-width="1"/>
-      <path d="M2 -36 Q8 -30 4 -22 Q0 -26 1 -33z" fill="${RED}"/>
-      <rect x="-13" y="-60" width="26" height="4" rx="2" fill="${LAVA}"/>
-      <rect x="-8" y="-78" width="16" height="19" rx="2" fill="${LAVA}"/>
-      <rect x="-8" y="-64" width="16" height="3" fill="${YEL}"/>
-    </g>`;
-  }
-
   // A Bad Guy in silhouette: fedora and trench coat.
   function badGuy(cx, base, s, delay) {
     return `<g class="rise" ${d(delay)}><g transform="translate(${cx} ${base}) scale(${s})" fill="#141210">
@@ -66,13 +45,48 @@
     return out;
   }
 
+  // Ambassador Gobbles' portrait (img/gobbles.webp), cropped by a viewBox on the 800x800 picture.
+  // crop is "x y w h" in picture pixels; his head sits around (420, 180).
+  const portrait = (x, y, w, h, crop, cls = "kb") =>
+    `<svg x="${x}" y="${y}" width="${w}" height="${h}" viewBox="${crop}" preserveAspectRatio="xMidYMid slice">` +
+    `<image href="img/gobbles.webp" width="800" height="800" class="${cls}"/></svg>`;
+
   const SCENES = {
+    // The opening: Station ARCO's radio tuning in.
+    radio: `<svg viewBox="0 0 320 180" role="img" aria-label="A radio tuning in to Station ARCO">
+      <defs>
+        <clipPath id="sc-dial"><rect x="78" y="50" width="164" height="36" rx="3"/></clipPath>
+        <radialGradient id="sc-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${YEL}" stop-opacity=".35"/><stop offset="1" stop-color="${YEL}" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="320" height="180" fill="#23282a"/>
+      <rect x="0" y="122" width="320" height="1.5" fill="#3a3f40"/>
+      <text x="14" y="24" font-family="Overpass, sans-serif" font-weight="800" font-size="13" fill="${YEL}" class="blink-slow">INCOMING TRANSMISSION</text>
+      <circle cx="306" cy="19" r="4" fill="${RED}" class="blink"/>
+      <ellipse cx="160" cy="68" rx="110" ry="40" fill="url(#sc-glow)" class="pulse"/>
+      <g class="rise">
+        <rect x="62" y="36" width="196" height="118" rx="14" fill="#151817"/>
+        <rect x="66" y="40" width="188" height="110" rx="11" fill="#5a5d52"/>
+        <rect x="78" y="50" width="164" height="36" rx="3" fill="#141815"/>
+        <g clip-path="url(#sc-dial)">
+          ${Array.from({ length: 33 }, (_, i) => `<rect x="${82 + i * 4.9}" y="54" width="0.8" height="${i % 5 === 0 ? 14 : 8}" fill="${YEL}" opacity=".85"/>`).join("")}
+          <g class="wave-scroll"><path d="${Array.from({ length: 12 }, (_, i) => `M${70 + i * 40} 76 h14 l4 -9 l5 17 l5 -22 l5 14 h7`).join(" ")}" fill="none" stroke="${YEL}" stroke-width="1.6" stroke-linejoin="round" class="wave-amp"/></g>
+          <rect x="0" y="50" width="2" height="36" fill="${RED}" class="needle"/>
+        </g>
+        <g transform="translate(97 118)"><circle r="14" fill="#262923" stroke="#b9b39f" stroke-width="2.5"/><rect x="-1.4" y="-10" width="2.8" height="8" rx="1" fill="${YEL}" class="knob"/></g>
+        <g transform="translate(223 118)"><circle r="14" fill="#262923" stroke="#b9b39f" stroke-width="2.5"/><rect x="-1.4" y="-10" width="2.8" height="8" rx="1" fill="${YEL}" class="knob knob-2"/></g>
+        <g fill="#2b2e29">${Array.from({ length: 7 }, (_, i) => `<rect x="125" y="${104 + i * 4.4}" width="70" height="2"/>`).join("")}</g>
+        <circle cx="160" cy="94" r="2" fill="#7cf08a" class="blink"/>
+      </g>
+      <text x="160" y="172" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${YEL}" letter-spacing=".08em">STATION ARCO</text>
+    </svg>`,
+
     // The Bad Guys break in on the frequency.
     badguys: `<svg viewBox="0 0 320 180" role="img" aria-label="The Bad Guys, in silhouette">
       <defs><radialGradient id="sc-red" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#e0533f"/><stop offset="1" stop-color="#4a100c"/></radialGradient></defs>
       <rect width="320" height="180" fill="url(#sc-red)"/>
       <g fill="#000" opacity=".16">${Array.from({ length: 11 }, (_, i) => `<rect y="${i * 17}" width="320" height="7"/>`).join("")}</g>
-      ${badGuy(84, 186, 0.78, 0.3)}${badGuy(236, 186, 0.86, 0.6)}${badGuy(160, 190, 1, 0)}
+      <rect x="-120" y="0" width="90" height="180" fill="#fff" opacity=".08" class="sweep"/>
+      <g class="glitch">${badGuy(84, 186, 0.78, 0.3)}${badGuy(236, 186, 0.86, 0.6)}${badGuy(160, 190, 1, 0)}</g>
       <g class="flicker" fill="#fff" opacity=".5">${Array.from({ length: 9 }, (_, i) => `<rect x="${(i * 53) % 300}" y="${(i * 37) % 170}" width="${20 + ((i * 29) % 60)}" height="1"/>`).join("")}</g>
       <text x="12" y="20" font-family="Overpass Mono, monospace" font-size="11" fill="#fff" opacity=".85">SIGNAL HIJACKED</text>
       <circle cx="306" cy="16" r="5" fill="#fff" class="blink"/>
@@ -114,40 +128,61 @@
       </g>
     </svg>`,
 
-    // Ambassador Gobbles, rescued in 2024.
-    gobbles: `<svg viewBox="0 0 320 180" role="img" aria-label="Ambassador Gobbles, rescued in Operation Feather Recovery, 2024">
-      <rect width="320" height="180" fill="${BLUE}"/>
-      <g fill="#fff" opacity=".08">${Array.from({ length: 8 }, (_, i) => `<circle cx="${20 + i * 42}" cy="${i % 2 ? 30 : 150}" r="${14 + (i % 3) * 6}"/>`).join("")}</g>
-      <ellipse cx="160" cy="92" rx="84" ry="80" fill="${LIME}" stroke="${YEL}" stroke-width="6"/>
-      <g class="pop">${gobbles(160, 112, 0.82)}</g>
-      <rect x="78" y="150" width="164" height="22" rx="4" fill="${YEL}" stroke="${LAVA}" stroke-width="2"/>
-      <text x="160" y="166" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="12" fill="${BLUE}">AMBASSADOR GOBBLES</text>
-      <g class="slam" ${d(1.4)} transform="translate(258 52)">
-        <g transform="rotate(-14)">
-          <rect x="-46" y="-17" width="92" height="34" rx="4" fill="none" stroke="${RED}" stroke-width="3.5"/>
-          <text y="-2" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="12" fill="${RED}">RESCUED</text>
-          <text y="12" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="11" fill="${RED}">2024</text>
+    // Ambassador Gobbles' 2024 case file: his portrait clipped to the Operation Feather Recovery dossier.
+    gobbles: `<svg viewBox="0 0 320 180" role="img" aria-label="Ambassador Gobbles' case file from Operation Feather Recovery, 2024">
+      <defs><clipPath id="sc-photo"><rect x="0" y="0" width="118" height="118"/></clipPath></defs>
+      <svg width="320" height="180" viewBox="0 120 800 450" preserveAspectRatio="xMidYMid slice"><image href="img/dossier.webp" width="800" height="800" class="kb-slow"/></svg>
+      <rect width="320" height="180" fill="#1b1612" opacity=".68"/>
+      <g class="drop-in" ${d(0.2)}>
+        <g transform="translate(46 22) rotate(-4)">
+          <rect x="-7" y="-7" width="132" height="150" fill="#f7f3ea" stroke="#d8cfbd"/>
+          <g clip-path="url(#sc-photo)">${portrait(0, 0, 118, 118, "230 40 380 380")}</g>
+          <text x="59" y="134" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="9" fill="${LAVA}">AMBASSADOR GOBBLES</text>
+          <path d="M96 -14 v22 q0 6 -6 6 q-6 0 -6 -6 v-18 q0 -3 3 -3 q3 0 3 3 v16" fill="none" stroke="#a7acb1" stroke-width="2.2" stroke-linecap="round"/>
+        </g>
+      </g>
+      <g class="type-in" ${d(0.9)}>
+        <rect x="196" y="40" width="112" height="20" rx="2" fill="#f7f3ea" opacity=".95"/>
+        <text x="252" y="54" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="8" fill="${LAVA}">CASE FILE · 2024</text>
+        <rect x="196" y="64" width="112" height="34" rx="2" fill="#f7f3ea" opacity=".95"/>
+        <text x="252" y="78" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="8" fill="${LAVA}">OPERATION</text>
+        <text x="252" y="91" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="8" fill="${LAVA}">FEATHER RECOVERY</text>
+      </g>
+      <g class="slam" style="--x:252px;--y:128px;--d:1.8s" transform="translate(252 128)">
+        <g transform="rotate(-10)">
+          <rect x="-50" y="-19" width="100" height="38" rx="4" fill="#f7f3ea" opacity=".2"/>
+          <rect x="-50" y="-19" width="100" height="38" rx="4" fill="none" stroke="${RED}" stroke-width="3.5"/>
+          <text y="-1" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="14" fill="${RED}">RESCUED</text>
+          <text y="13" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="10" fill="${RED}">BY AGENTS</text>
         </g>
       </g>
     </svg>`,
 
     // The Thanksgiving Peace Summit, with Gobbles in the chair.
     summit: `<svg viewBox="0 0 320 180" role="img" aria-label="Ambassador Gobbles chairing the Thanksgiving Peace Summit">
-      <rect width="320" height="180" fill="#efe9dd"/>
-      <rect x="0" y="0" width="320" height="10" fill="${BLUE}"/>
-      <g transform="translate(160 30)">
-        <rect x="-148" y="-16" width="296" height="32" rx="6" fill="${BLUE}"/>
-        ${atom(-128, 0, 9, YEL)}${atom(128, 0, 9, YEL)}
-        <text y="5" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="12.5" fill="${YEL}">THANKSGIVING PEACE SUMMIT</text>
+      <defs><clipPath id="sc-oval"><ellipse cx="160" cy="84" rx="40" ry="46"/></clipPath>
+        <linearGradient id="sc-hall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3ede0"/><stop offset="1" stop-color="#ddd3c0"/></linearGradient></defs>
+      <rect width="320" height="180" fill="url(#sc-hall)"/>
+      ${[20, 70, 250, 300].map((x) => `<rect x="${x - 6}" y="0" width="12" height="130" fill="#e6dccb"/><rect x="${x - 9}" y="0" width="18" height="6" fill="#d2c6b0"/>`).join("")}
+      <g transform="translate(160 22)" class="drop-in">
+        <rect x="-138" y="-14" width="276" height="28" rx="5" fill="${BLUE}"/>
+        ${atom(-120, 0, 8, YEL)}${atom(120, 0, 8, YEL)}
+        <text y="5" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="12" fill="${YEL}">THANKSGIVING PEACE SUMMIT</text>
       </g>
-      ${[[52, "#7a8f5a", 0.2], [100, "#b5651d", 0.35], [220, "#6a5d8f", 0.5], [268, "#3f7f86", 0.65]]
-        .map(([x, c, t]) => `<g class="pop" ${d(t)}><circle cx="${x}" cy="92" r="14" fill="#e3c3a6" stroke="${LAVA}" stroke-width="2"/><path d="M${x - 22} 130 Q${x - 20} 108 ${x} 108 Q${x + 20} 108 ${x + 22} 130z" fill="${c}" stroke="${LAVA}" stroke-width="2"/></g>`)
+      <g class="pop" ${d(0.5)}>
+        <ellipse cx="160" cy="84" rx="45" ry="51" fill="#c9a24a"/>
+        <ellipse cx="160" cy="84" rx="42" ry="48" fill="#8a6a22"/>
+        <g clip-path="url(#sc-oval)">${portrait(118, 36, 84, 96, "255 25 340 390", "")}</g>
+        <rect x="128" y="128" width="64" height="12" rx="2" fill="#c9a24a"/>
+        <text x="160" y="137" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="7" fill="${LAVA}">CHAIR</text>
+      </g>
+      ${[[40, "#7a8f5a", 0.9], [86, "#b5651d", 1.05], [234, "#6a5d8f", 1.2], [280, "#3f7f86", 1.35]]
+        .map(([x, c, t]) => `<g class="pop" ${d(t)}><circle cx="${x}" cy="112" r="12" fill="#e3c3a6" stroke="${LAVA}" stroke-width="2"/><path d="M${x - 19} 146 Q${x - 18} 126 ${x} 126 Q${x + 18} 126 ${x + 19} 146z" fill="${c}" stroke="${LAVA}" stroke-width="2"/></g>`)
         .join("")}
-      <g class="pop" ${d(0.9)}>${gobbles(160, 100, 0.62)}</g>
-      <rect x="20" y="126" width="280" height="14" rx="3" fill="#8b5a36" stroke="${LAVA}" stroke-width="2"/>
-      <path d="M30 140 V176 M290 140 V176" stroke="${LAVA}" stroke-width="5"/>
-      <g transform="translate(78 120)"><path d="M-14 6 L14 6 L10 -2 L-10 -2z" fill="#d9822b" stroke="${LAVA}" stroke-width="1.5"/><path d="M-10 -2 Q0 -10 10 -2" fill="#f0c27a" stroke="${LAVA}" stroke-width="1.5"/></g>
-      <g transform="translate(244 118)"><rect x="-14" y="2" width="20" height="5" rx="2" fill="#5a3a22"/><rect x="2" y="-6" width="8" height="12" rx="2" fill="#5a3a22"/></g>
+      <rect x="10" y="144" width="300" height="12" rx="3" fill="#8b5a36" stroke="${LAVA}" stroke-width="2"/>
+      <path d="M22 156 V180 M298 156 V180" stroke="${LAVA}" stroke-width="5"/>
+      <g transform="translate(64 140)"><path d="M-12 4 L12 4 L9 -3 L-9 -3z" fill="#d9822b" stroke="${LAVA}" stroke-width="1.5"/><path d="M-9 -3 Q0 -10 9 -3" fill="#f0c27a" stroke="${LAVA}" stroke-width="1.5"/></g>
+      <g transform="translate(258 138)"><rect x="-12" y="2" width="18" height="4" rx="2" fill="#5a3a22"/><rect x="2" y="-5" width="7" height="11" rx="2" fill="#5a3a22"/></g>
     </svg>`,
 
     // Count Georg von Arco and his legendary relays.
@@ -212,4 +247,18 @@
   };
 
   window.SCENES = SCENES;
+
+  // The evidence board: every briefing picture as a tilted, red-framed card, like photos pinned up after a mission.
+  // Spots are left %, top %, tilt in degrees, for up to 9 cards in a loose 3 x 3.
+  const SPOTS = [[1, 9, -7], [35, 2, 4], [68, 8, -3], [4, 39, 5], [36, 36, -4], [67, 41, 6], [2, 70, -3], [34, 68, 5], [66, 72, -6]];
+  const picture = (b) => (b.image ? `<img src="${b.image}" alt="">` : SCENES[b.scene] || "");
+  window.scenePicture = picture;
+  window.evidenceBoard = function (list, title = "Mission Briefing") {
+    return `<div class="board"><h2 class="board-title">${title}</h2><div class="collage">${list
+      .map((b, i) => {
+        const [x, y, r] = SPOTS[i % SPOTS.length];
+        return `<div class="ev" style="--x:${x}%;--y:${y}%;--r:${r}deg;--i:${i}">${picture(b)}</div>`;
+      })
+      .join("")}</div></div>`;
+  };
 })();
