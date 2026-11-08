@@ -13,20 +13,6 @@
     `<ellipse rx="${r}" ry="${r * 0.38}"/><ellipse rx="${r}" ry="${r * 0.38}" transform="rotate(60)"/><ellipse rx="${r}" ry="${r * 0.38}" transform="rotate(120)"/></g>` +
     `<circle r="${r * 0.2}" fill="${color}"/></g>`;
 
-  // A Bad Guy in silhouette: fedora and trench coat.
-  function badGuy(cx, base, s, delay) {
-    return `<g class="rise" ${d(delay)}><g transform="translate(${cx} ${base}) scale(${s})" fill="#141210">
-      <path d="M-46 0 L-40 -62 Q-36 -86 0 -88 Q36 -86 40 -62 L46 0z"/>
-      <path d="M-10 -88 L0 -60 L10 -88z" fill="#2b2522"/>
-      <rect x="-9" y="-98" width="18" height="12"/>
-      <ellipse cx="0" cy="-110" rx="16" ry="18"/>
-      <rect x="-30" y="-124" width="60" height="6" rx="3"/>
-      <path d="M-19 -122 L-15 -142 Q0 -148 15 -142 L19 -122z"/>
-      <rect x="-7" y="-114" width="5" height="2" fill="${RED}" opacity=".9" class="blink" ${d(delay + 1.2)}/>
-      <rect x="3" y="-114" width="5" height="2" fill="${RED}" opacity=".9" class="blink" ${d(delay + 1.2)}/>
-    </g></g>`;
-  }
-
   // A row of small-town buildings with lit windows.
   function town(y, windowClass, startDelay, step, sky = "") {
     const blds = [
@@ -86,8 +72,15 @@
       <defs><radialGradient id="sc-red" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#e0533f"/><stop offset="1" stop-color="#4a100c"/></radialGradient></defs>
       <rect width="320" height="180" fill="url(#sc-red)"/>
       <g fill="#000" opacity=".16">${Array.from({ length: 11 }, (_, i) => `<rect y="${i * 17}" width="320" height="7"/>`).join("")}</g>
-      <rect x="-120" y="0" width="90" height="180" fill="#fff" opacity=".08" class="sweep"/>
-      <g class="glitch">${badGuy(84, 186, 0.78, 0.3)}${badGuy(236, 186, 0.86, 0.6)}${badGuy(160, 190, 1, 0)}</g>
+      <defs><radialGradient id="sc-spot" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd9c9" stop-opacity=".55"/><stop offset="1" stop-color="#ffd9c9" stop-opacity="0"/></radialGradient></defs>
+      <ellipse cx="0" cy="96" rx="70" ry="100" fill="url(#sc-spot)" class="spot"/>
+      <ellipse cx="160" cy="177" rx="150" ry="9" fill="#000" opacity=".45"/>
+      <g class="glitch"><g class="rise"><g class="breathe">
+        <image href="img/badguys.webp" x="31" y="8" width="258" height="172"/>
+        ${[[63, 71, 2.2], [107, 52.5, 2.6], [160, 35.7, 1.6], [219, 45.8, 3.1], [262, 70, 3.6]]
+          .map(([x, y, t]) => `<g class="glint" style="--d:${t}s" fill="${RED}"><rect x="${x - 4}" y="${y}" width="3" height="1.1" rx=".5"/><rect x="${x + 1}" y="${y}" width="3" height="1.1" rx=".5"/></g>`)
+          .join("")}
+      </g></g></g>
       <g class="flicker" fill="#fff" opacity=".5">${Array.from({ length: 9 }, (_, i) => `<rect x="${(i * 53) % 300}" y="${(i * 37) % 170}" width="${20 + ((i * 29) % 60)}" height="1"/>`).join("")}</g>
       <text x="12" y="20" font-family="Overpass Mono, monospace" font-size="11" fill="#fff" opacity=".85">SIGNAL HIJACKED</text>
       <circle cx="306" cy="16" r="5" fill="#fff" class="blink"/>
@@ -215,21 +208,82 @@
         return `<g><circle cx="${x}" cy="34" r="15" fill="#d2cdc3" stroke="#a9a397" stroke-width="2.5" class="lamp-on" ${d(0.5 + i * 0.35)}/>${atom(x, 34, 9, "#8a8378")}</g>`;
       }).join("")}
       <path d="M60 64 L60 84 M260 64 L260 84" stroke="#a9a397" stroke-width="3" stroke-dasharray="4 4"/>
-      <g transform="translate(110 122)">
+      <g transform="translate(110 114)">
         <path d="M-26 -20 V-34 Q-26 -56 0 -56 Q26 -56 26 -34 V-20" fill="none" stroke="#8a8378" stroke-width="8"/>
         <rect x="-44" y="-22" width="88" height="62" rx="10" fill="${YEL}" stroke="${LAVA}" stroke-width="3"/>
         ${[0, 1, 2, 3].map((i) => `<rect x="${-36 + i * 19}" y="-6" width="15" height="22" rx="3" fill="#fff" stroke="${LAVA}" stroke-width="2"/><text x="${-28.5 + i * 19}" y="11" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="14" fill="${LAVA}" class="pop" ${d(1.4 + i * 0.7)}>?</text>`).join("")}
       </g>
-      <g transform="translate(232 120)">
+      <g transform="translate(232 108)">
         <rect x="-30" y="-40" width="60" height="80" rx="6" fill="${LAVA}"/>
         <rect x="-20" y="-28" width="40" height="56" rx="4" fill="#4a4541"/>
         <g class="throw" ${d(4.2)}><rect x="-4" y="-34" width="8" height="34" rx="3" fill="${RED}"/><circle cy="-34" r="8" fill="${RED}"/></g>
-        <text y="58" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">MASTER SWITCH</text>
+        <text y="54" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">MASTER SWITCH</text>
       </g>
     </svg>`,
   };
 
   window.SCENES = SCENES;
+
+  // The Bad Guys taking over the broadcast: the picture tears and shifts color, static floods in,
+  // "SIGNAL HIJACKED" flashes, and Operator Arco's words scramble. Calls done() when it's time to show their feed.
+  // fig = the scene's <figure>, text = the words box, frame = the box whose colored edge turns red.
+  window.hijack = function (fig, text, frame, done) {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !fig) return done();
+    if (window.GAMEAUDIO) { GAMEAUDIO.stop(); GAMEAUDIO.staticBurst(1.6, 0.3); }
+    fig.classList.add("hijack");
+    if (frame) frame.classList.add("hijack-frame");
+
+    // Live TV static, drawn small and stretched so it looks chunky.
+    const c = document.createElement("canvas");
+    c.width = 160; c.height = 90; c.className = "hijack-noise";
+    fig.appendChild(c);
+    const ctx = c.getContext("2d");
+    const img = ctx.createImageData(c.width, c.height);
+    const start = performance.now();
+    let raf = 0;
+    const frameNoise = (now) => {
+      const d = img.data;
+      const red = now - start > 500;
+      for (let i = 0; i < d.length; i += 4) {
+        const v = (Math.random() * 255) | 0;
+        d[i] = red ? Math.min(255, v + 60) : v; d[i + 1] = red ? v * 0.55 : v; d[i + 2] = red ? v * 0.5 : v; d[i + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      // a few torn bands
+      for (let b = 0; b < 3; b++) {
+        const y = (Math.random() * c.height) | 0;
+        ctx.fillStyle = `rgba(0,0,0,${0.3 + Math.random() * 0.4})`;
+        ctx.fillRect(0, y, c.width, 2 + Math.random() * 6);
+      }
+      if (now - start < 1500) raf = requestAnimationFrame(frameNoise);
+    };
+    raf = requestAnimationFrame(frameNoise);
+
+    const label = document.createElement("div");
+    label.className = "hijack-label";
+    label.textContent = "SIGNAL HIJACKED";
+    fig.appendChild(label);
+
+    // Scramble the words a little more each tick.
+    let scramble = 0;
+    if (text) {
+      const orig = text.textContent;
+      const glyphs = "▓▒░█#%&@!?";
+      let k = 0;
+      scramble = setInterval(() => {
+        k++;
+        text.textContent = orig.replace(/\S/g, (ch) => (Math.random() < k / 9 ? glyphs[(Math.random() * glyphs.length) | 0] : ch));
+        if (k >= 12) clearInterval(scramble);
+      }, 90);
+    }
+
+    setTimeout(() => {
+      cancelAnimationFrame(raf);
+      clearInterval(scramble);
+      done();
+    }, 1400);
+  };
 
   // The evidence board: every briefing picture as a tilted, red-framed card, like photos pinned up after a mission.
   // Spots are left %, top %, tilt in degrees, for up to 9 cards in a loose 3 x 3.

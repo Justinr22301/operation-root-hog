@@ -117,8 +117,9 @@ window.GAME = {
       from: "Operator Arco",
       audio: null,
       text:
-        "Today the Bad Guys have jammed every one. Restore your relays. Every two you bring back give you one digit of your family's code. " +
-        "When every family has its code, we throw the master switch together.\n\n" +
+        "Today the Bad Guys have jammed every relay and power station in the valley. It's up to you to bring them back.\n\n" +
+        "Every two relays you restore unlock one digit of your family's code. " +
+        "Once every family has its code, we throw the master switch together and the power comes back on.\n\n" +
         "Report in at every relay. Station ARCO, over and out.",
     },
   ],

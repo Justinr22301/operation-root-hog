@@ -36,7 +36,24 @@
     tick();
   }
 
+  // Moving on from a scene marked `cut` plays the Bad Guys' hijack first.
+  let hijacking = false;
   function show(n) {
+    if (hijacking) return;
+    if (n === step + 1 && step >= 0 && step < steps.length && steps[step].cut) {
+      hijacking = true;
+      clearTimeout(timer);
+      clearTimeout(typing);
+      hijack(root.querySelector(".p-stage .scene"), document.getElementById("p-text"), root.querySelector(".p-words"), () => {
+        hijacking = false;
+        go(n);
+      });
+      return;
+    }
+    go(n);
+  }
+
+  function go(n) {
     clearTimeout(timer);
     clearTimeout(typing);
     GAMEAUDIO.stop();
@@ -58,7 +75,8 @@
     const target = root.querySelector(".p-pile");
     if (!target || !el.animate) return;
     const to = target.getBoundingClientRect();
-    el.classList.remove("enter");
+    el.classList.remove("enter", "hijack");
+    el.querySelectorAll(".hijack-noise, .hijack-label").forEach((x) => x.remove());
     el.style.cssText = `position:fixed;left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px;margin:0;z-index:50;pointer-events:none`;
     document.body.appendChild(el);
     const dx = to.left + to.width / 2 - (from.left + from.width / 2);
@@ -90,7 +108,7 @@
     root.innerHTML = `
       <header class="p-top"><strong>STATION ARCO</strong><div class="p-dots">${steps.map((_, i) => `<span class="${i < step ? "on" : i === step ? "here" : ""}"></span>`).join("")}</div></header>
       <div class="p-stage">
-        <figure class="scene enter">${pic}</figure>
+        <figure class="scene enter ${steps[step - 1] && steps[step - 1].cut ? "roll" : ""}">${pic}</figure>
         <div class="p-words ${esc(b.voice)}"><p class="p-from">From ${esc(b.from)}</p><div class="p-text" id="p-text"></div></div>
       </div>
       <footer class="p-bar"><div class="p-evidence">${pile(newest)}</div>
@@ -137,8 +155,8 @@
     if (!a) return;
     GAMEAUDIO.ensure();
     const act = a.dataset.act;
-    if (act === "begin") { sound = true; fullScreen(); return show(0); }
-    if (act === "restart") { collected.length = 0; return show(-1); }
+    if (act === "begin") { sound = true; fullScreen(); return go(0); }
+    if (act === "restart") { collected.length = 0; return go(-1); }
     if (act === "next") return show(step + 1);
     if (act === "back") return show(step - 1);
     if (act === "sound") return toggleSound(a);

@@ -244,7 +244,7 @@
       const pic = b.image ? `<img src="${esc(b.image)}" alt="">` : (window.SCENES && SCENES[b.scene]) || "";
       return `<section class="screen briefing">
         <h1>${b.voice === "badguys" ? "Incoming transmission" : "Your briefing"}</h1>
-        ${pic ? `<figure class="scene enter">${pic}</figure>` : ""}
+        ${pic ? `<figure class="scene enter ${steps[view.step - 1] && steps[view.step - 1].cut ? "roll" : ""}">${pic}</figure>` : ""}
         <div class="brief-progress" role="img" aria-label="Part ${view.step + 1} of ${steps.length}">${steps.map((_, i) => `<span class="${i < view.step ? "on" : i === view.step ? "here" : ""}"></span>`).join("")}</div>
         <div class="radio ${b.voice}">
           <p class="radio-from">From ${esc(b.from)}</p>
@@ -463,6 +463,22 @@
     </section>`;
   }
 
+  // Next briefing scene. Leaving a scene marked `cut` plays the Bad Guys' hijack first.
+  let hijacking = false;
+  function nextBriefing() {
+    if (hijacking) return;
+    const b = GAME.briefing[view.step];
+    const next = () => go("briefing", { step: view.step + 1 });
+    if (!b || !b.cut) return next();
+    hijacking = true;
+    clearTimeout(briefTimer);
+    clearTimeout(typingTimer);
+    hijack(app.querySelector(".scene"), document.getElementById("radio-text"), app.querySelector(".briefing .radio"), () => {
+      hijacking = false;
+      if (view.name === "briefing") next();
+    });
+  }
+
   // Reads the current briefing scene aloud, then moves on to the next one by itself.
   function narrateScene() {
     clearTimeout(briefTimer);
@@ -471,7 +487,7 @@
     const still = () => narrate && view.name === "briefing" && view.step === step;
     const ok = GAMEAUDIO.play(b.audio, b.text, b.voice, () => {
       if (!still()) return;
-      briefTimer = setTimeout(() => { if (still()) go("briefing", { step: step + 1 }); }, b.cut ? 0 : 1200);
+      briefTimer = setTimeout(() => { if (still()) nextBriefing(); }, b.cut ? 0 : 1200);
     });
     if (ok === false) {
       narrate = false;
@@ -810,7 +826,7 @@
         clearTimeout(briefTimer);
         return GAMEAUDIO.stop();
       }
-      case "briefing-next": return go("briefing", { step: view.step + 1 });
+      case "briefing-next": return nextBriefing();
       case "briefing-back": return go("briefing", { step: Math.max(0, view.step - 1) });
       case "briefing-done": narrate = false; S.briefingDone = true; save(); return home();
       case "watch-briefing": return go("briefing", { step: 0 });
