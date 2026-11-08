@@ -1,6 +1,6 @@
 // Caches the whole app at kickoff so relays still open with no signal.
 // Always tries the network first, so updates show up right away; the cache is the fallback.
-const VERSION = "roothog-v2";
+const VERSION = "roothog-v3";
 const FILES = [
   "./",
   "index.html",
@@ -34,7 +34,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return; // Supabase calls go straight to the network
   event.respondWith(
-    fetch(event.request)
+    // no-cache: always ask GitHub whether the file changed (a quick 304 if not), instead of
+    // trusting the browser's 10-minute copy. Without it, updates can take 10 minutes to appear.
+    fetch(event.request, { cache: "no-cache" })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
