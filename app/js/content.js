@@ -30,6 +30,10 @@ window.GAME = {
       audio: null, // e.g. "audio/briefing.mp3"
       text:
         "Station ARCO to all agents. This is Operator Arco. Do you copy?\n\n" +
+        "That was the Bad Guys. Some of you met them in 2024. In Operation Feather Recovery they snatched Ambassador Gobbles, " +
+        "and agents cracked every one of their codes to bring him home. The Bad Guys never got over it.\n\n" +
+        "This year Ambassador Gobbles is chairing the Thanksgiving Peace Summit right here in Arco. " +
+        "The Bad Guys want to ruin it, and they want you to know they're back.\n\n" +
         "This town is named for Count Georg von Arco, a German radio pioneer who never set foot in Idaho. " +
         "Legend says he sent a gift to the town that carried his name: eight radio relays hidden around the valley. " +
         "In 1955, when Arco became the first town lit by atomic power, those relays carried the signal.\n\n" +

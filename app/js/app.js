@@ -31,6 +31,10 @@
   const relayById = (id) => (id === "family" ? GAME.family : GAME.relays.find((r) => r.id === id));
   const prog = (id) => (S.progress[id] = S.progress[id] || { stage: "find", hints: 0, map: false, main: false, junior: false, juniorTries: 0, typed: false });
   const allIds = () => S.team.route.concat("family");
+  // A stop's name stays hidden ("Station 3") until the family taps "We're here".
+  const revealed = (id) => id === "family" || (S.progress[id] && S.progress[id].stage !== "find");
+  const label = (id) => (revealed(id) ? relayById(id).name : `Station ${S.team.route.indexOf(id) + 1}`);
+  const shortLabel = (id) => (revealed(id) ? relayById(id).name.replace(" Relay", "") : label(id));
   const restoredIds = () => allIds().filter((id) => S.progress[id] && S.progress[id].stage === "restored");
   const restoredPlaces = () => S.team.route.filter((id) => S.progress[id] && S.progress[id].stage === "restored").length;
   const familyUnlocked = () => restoredPlaces() >= GAME.family.unlockAfter;
@@ -164,7 +168,7 @@
             <label class="field"><span>Something your kids know that other families wouldn't</span><textarea name="secret" rows="2" maxlength="200"></textarea></label>
           </fieldset>
 
-          <label class="choice"><input type="checkbox" name="tracking"><span>Share our location with the game master during the game, so he can send help if we get stuck. It's deleted afterward.</span></label>
+          <label class="choice"><input type="checkbox" name="tracking" checked><span>Share our location with the game master during the game, so he can send help if we get stuck. It's deleted afterward.</span></label>
 
           <p class="error" id="signup-error" role="alert"></p>
           <button class="btn primary" type="submit">Create our team</button>
@@ -244,12 +248,12 @@
             const on = p && p.stage === "restored";
             const locked = id === "family" && !familyUnlocked();
             const current = id === nxt;
-            return `<li class="lamp-item"><button class="lamp ${on ? "on" : ""} ${current ? "current" : ""} ${locked ? "locked" : ""}" data-action="open-relay" data-id="${id}" ${locked ? "disabled" : ""} aria-label="${esc(r.name)}${on ? ", restored" : locked ? ", unlocks after 3 relays" : ""}">${ATOM}</button><span class="lamp-label">${esc(r.name.replace(" Relay", ""))}</span></li>`;
+            return `<li class="lamp-item"><button class="lamp ${on ? "on" : ""} ${current ? "current" : ""} ${locked ? "locked" : ""}" data-action="open-relay" data-id="${id}" ${locked ? "disabled" : ""} aria-label="${esc(label(id))}${on ? ", restored" : locked ? ", unlocks after 3 relays" : ""}">${ATOM}</button><span class="lamp-label">${esc(shortLabel(id))}</span></li>`;
           }).join("")}
         </ol>
         <div class="code-slots" aria-label="Your code so far">${digits.map((d) => `<span class="slot ${d.trim() ? "filled" : ""}">${esc(d.trim() || "")}</span>`).join("")}</div>
         <div class="stack">
-          ${nxt ? `<button class="btn primary" data-action="open-relay" data-id="${nxt}">Next: ${esc(relayById(nxt).name)}</button>` : ""}
+          ${nxt ? `<button class="btn primary" data-action="open-relay" data-id="${nxt}">Next: ${esc(label(nxt))}</button>` : ""}
           ${familyUnlocked() && !fam ? `<button class="btn" data-action="open-relay" data-id="family">Solve the Family Relay in the car</button>` : ""}
           ${!familyUnlocked() ? `<p class="help">The Family Relay unlocks after ${GAME.family.unlockAfter} relays.</p>` : ""}
           ${allDone() ? `<button class="btn primary" data-action="finale">Head to the substation</button>` : ""}
@@ -266,8 +270,8 @@
       if (p.stage === "restored") return restoredView(r, p);
       if (id !== "family" && p.stage === "find") {
         return `${topbar(true)}<section class="screen">
-          <h1>${esc(r.name)}</h1>
-          ${pos ? `<p class="help">Stop ${pos} of ${S.team.route.length} on your route</p>` : ""}
+          <h1>${esc(label(id))}</h1>
+          ${pos ? `<p class="help">Stop ${pos} of ${S.team.route.length} on your route. Its name shows up once you get there.</p>` : ""}
           <div class="badguys-note">
             <p class="radio-from">Intercepted from the Bad Guys</p>
             <p>${esc(r.find)}</p>
@@ -409,7 +413,7 @@
         ${allDone()
           ? `<button class="btn primary" data-action="finale">Head to the substation</button>`
           : nextPlace()
-            ? `<button class="btn primary" data-action="open-relay" data-id="${nextPlace()}">Next: ${esc(relayById(nextPlace()).name)}</button>`
+            ? `<button class="btn primary" data-action="open-relay" data-id="${nextPlace()}">Next: ${esc(label(nextPlace()))}</button>`
             : `<button class="btn primary" data-action="open-relay" data-id="family">Solve the Family Relay</button>`}
         <button class="btn" data-action="board">Relay board</button>
       </div>
