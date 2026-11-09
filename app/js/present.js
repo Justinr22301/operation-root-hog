@@ -97,8 +97,11 @@
       return;
     }
     if (step === steps.length) {
-      root.innerHTML = `<section class="p-end">${evidenceBoard(steps)}
-        <div class="p-end-words"><h1>Stand by, agents</h1>
+      const points = GAME.missionPoints || [];
+      root.innerHTML = `<section class="p-end">
+        <div class="p-mission"><h2>Your mission</h2>
+          <ol>${points.map((p, i) => `<li style="--d:${0.5 + i * 0.45}s">${esc(p)}</li>`).join("")}</ol></div>
+        <div class="p-end-words" style="--d:${0.7 + points.length * 0.45}s"><h1>Stand by, agents</h1>
         <p>Your phones will light up when Operator Arco starts the game.</p>
         <button class="link" data-act="restart">Play it again</button></div></section>`;
       return;

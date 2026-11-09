@@ -125,6 +125,15 @@ window.GAME = {
     },
   ],
 
+  // Shown on the TV after the last briefing scene, while everyone waits for the game to start.
+  missionPoints: [
+    "Find and restore 8 radio relays around Arco and Moore. One of them is written just for your family.",
+    "Every 2 relays you restore unlock 1 digit of your family's padlock code.",
+    "Report in on your phone at every relay. Junior agents have puzzles of their own.",
+    "Navigators work the phone. Drivers keep their eyes on the road.",
+    "When every family has its code, Station ARCO calls everyone in to throw the master switch together.",
+  ],
+
   relays: [
     {
       id: "sub",

@@ -30,14 +30,16 @@ body.present { background: #161412; color: #f6dc7a; margin: 0; overflow: hidden;
 .p-pile .ev.mini.new { animation: ev-in 0.45s 0.55s cubic-bezier(.3, 1.4, .5, 1) both; }
 .p-count { font: 600 clamp(12px, 1.1vw, 22px) var(--mono); color: #d9d0b3; }
 
-/* The end: every scene pinned to the evidence board */
-.p-end { grid-row: 1 / -1; display: grid; grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr); gap: 3vw; align-items: center; min-height: 0; }
-.p-end .board { background: none; padding: 0; margin: 0; overflow: visible; max-height: 92vh; }
-.p-end .collage { max-height: 80vh; aspect-ratio: 16 / 11; margin: 0 auto; }
-.p-end .board-title { font-size: clamp(28px, 3.6vw, 80px); margin-bottom: 5vh; }
-.p-end-words h1 { font-size: clamp(28px, 3.4vw, 76px); color: var(--sign-yellow); margin: 0 0 2vh; animation: fade-up 0.6s 2.4s both; }
-.p-end-words p { font-size: clamp(16px, 1.6vw, 34px); color: #d9d0b3; animation: fade-up 0.6s 2.6s both; }
+/* The end: the mission in a few lines, then "stand by" */
+.p-end { grid-row: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 5vw; align-items: center; min-height: 0; padding: 0 3vw; }
+.p-mission h2 { font-family: "Overpass Mono", monospace; font-size: clamp(16px, 1.5vw, 32px); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sign-yellow); margin: 0 0 3vh; animation: fade-up 0.6s 0.2s both; }
+.p-mission ol { list-style: none; counter-reset: pt; margin: 0; padding: 0; }
+.p-mission li { counter-increment: pt; position: relative; padding-left: 3.4em; margin-bottom: 2.6vh; font-size: clamp(16px, min(2vw, 3.4vh), 44px); line-height: 1.3; color: #f1ead6; animation: fade-up 0.6s var(--d) both; }
+.p-mission li::before { content: counter(pt); position: absolute; left: 0; top: -0.1em; width: 2.1em; height: 2.1em; display: grid; place-items: center; border-radius: 50%; background: var(--sign-blue); color: #fff; font-weight: 800; font-size: 0.85em; border: 2px solid var(--sign-yellow); }
+.p-end-words h1 { font-size: clamp(28px, 3.6vw, 80px); color: var(--sign-yellow); margin: 0 0 2vh; animation: fade-up 0.6s var(--d) both; }
+.p-end-words p { font-size: clamp(16px, 1.7vw, 36px); color: #d9d0b3; animation: fade-up 0.6s calc(var(--d) + 0.3s) both; }
 .p-end-words .link { color: #8d8478; font-size: clamp(14px, 1.2vw, 24px); }
+@media (max-aspect-ratio: 4/3) { .p-end { grid-template-columns: 1fr; align-content: center; } }
 
 /* Start and end cards */
 .p-card { grid-row: 1 / -1; align-self: center; justify-self: center; text-align: center; max-width: 70vw; }
