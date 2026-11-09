@@ -151,11 +151,11 @@
           <div style="--i:1"><dt>What</dt><dd>Your family drives between real places in Arco and Moore, cracking clues to bring Station ARCO's radio relays back on.</dd></div>
           <div style="--i:2"><dt>Who</dt><dd>Everyone in the car. Junior agents get puzzles of their own.</dd></div>
         </dl>
-        <p class="help">Sign up once per family. After that, anyone else in your family can join the same team on their own phone with your team code, and every phone follows the family's progress.</p>
+        <p class="help">Sign up once per family. The phone that signs up can invite everyone else in the family, and every phone follows the family's progress.</p>
         <div class="stack">
           <button class="btn primary" data-action="signup">Sign up your family</button>
-          <button class="btn" data-action="join">Join your family's team</button>
         </div>
+        <p class="join-line">Already signed up? <button class="link" data-action="join">Join your family's team</button></p>
         ${backend.kind === "demo" ? `<p class="note">Demo mode: this phone keeps everything to itself. Nothing is sent anywhere.</p>` : ""}
       </section>`;
     },
@@ -200,7 +200,7 @@
         <button class="link back" data-action="start">Back</button>
         <h1>Join your family's team</h1>
         <form id="join" class="form">
-          <label class="field"><span>Team code</span><input name="code" required maxlength="6" autocomplete="off" autocapitalize="characters" class="code-input" placeholder="ABC123"></label>
+          <label class="field"><span>Team code</span><input name="code" required maxlength="6" autocomplete="off" autocapitalize="characters" class="code-input" placeholder="ABC123" value="${esc(view.code || "")}"></label>
           <p class="error" id="join-error" role="alert"></p>
           <button class="btn primary" type="submit">Join team</button>
         </form>
@@ -219,8 +219,8 @@
         <div class="code-card">
           <p>Your team code</p>
           <p class="code-big" aria-label="Team code">${esc(S.code.split("").join(" "))}</p>
-          <p class="help">Other phones in your family join with this code.</p>
         </div>
+        ${invite()}
         <p class="help">We'll watch the briefing together first. This screen changes on its own when Operator Arco starts the game.</p>
         ${backend.kind === "demo" ? `<button class="btn" data-action="demo-start">Start the game (demo)</button>` : ""}
       </section>`;
@@ -364,6 +364,7 @@
         <h1>Settings</h1>
         <p>Team code</p>
         <p class="code-big">${esc(S.code.split("").join(" "))}</p>
+        ${invite()}
         ${S.started ? `<button class="btn" data-action="watch-briefing">Watch the briefing again</button>` : ""}
         <label class="choice"><input type="checkbox" data-setting="navigator" ${S.settings.navigator ? "checked" : ""}><span>This phone is the navigator's phone. The driver never uses it.</span></label>
         ${S.team.tracking ? `<label class="choice"><input type="checkbox" data-setting="tracking" ${S.settings.tracking ? "checked" : ""}><span>Share this phone's location with the game master.</span></label>` : ""}
@@ -666,6 +667,46 @@
     }
   }
 
+  // ---------- inviting the rest of the family ----------
+  // A link with the team code in it. Opening it on another phone joins the team with no typing.
+  const joinLink = () => `${location.origin}${location.pathname}?join=${encodeURIComponent(S.code)}`;
+
+  function qrSvg(text) {
+    if (!window.qrcode) return "";
+    try {
+      const q = qrcode(0, "M");
+      q.addData(text);
+      q.make();
+      return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true, alt: "QR code to join your family's team" });
+    } catch (e) { return ""; }
+  }
+
+  function invite() {
+    const qr = qrSvg(joinLink());
+    return `<div class="invite">
+      <h2>Invite your family</h2>
+      <p class="help">Everyone else in the family can follow along on their own phone.${qr ? " Scan this with their phone's camera, or send them the link." : " Send them the link."}</p>
+      ${qr ? `<div class="qr">${qr}</div>` : ""}
+      <button class="btn" data-action="share-invite">Send the join link</button>
+      <p class="help small">Or open this site on their phone, tap Join your family's team and enter ${esc(S.code)}.</p>
+    </div>`;
+  }
+
+  async function shareInvite(btn) {
+    const url = joinLink();
+    const text = `Join ${S.team && S.team.name ? S.team.name : "our team"} for Operation Root Hog. Team code ${S.code}.`;
+    if (navigator.share) {
+      try { await navigator.share({ title: "Operation Root Hog", text, url }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      btn.textContent = "Link copied. Paste it in a text.";
+    } catch (e) {
+      btn.textContent = url;
+    }
+  }
+
   async function submitJoin(form) {
     const err = document.getElementById("join-error");
     const code = String(new FormData(form).get("code") || "").toUpperCase().trim();
@@ -814,6 +855,7 @@
       case "start": return go("start");
       case "signup": return go("signup");
       case "join": return go("join");
+      case "share-invite": return shareInvite(t);
       case "home": return home();
       case "board": return S.started ? go("board") : home();
       case "settings": return go("settings");
@@ -927,6 +969,20 @@
       navigator.serviceWorker.register("sw.js").catch(() => {});
     }
     if (S.code) startLive();
+    // Opened from a join link (?join=CODE): join that team, or fill in the code if this phone is already on one.
+    const joinCode = new URLSearchParams(location.search).get("join");
+    if (joinCode) {
+      history.replaceState(null, "", location.pathname);
+      const code = joinCode.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+      if (code && code !== S.code) {
+        go("join", { code });
+        if (!S.code) {
+          const f = document.getElementById("join");
+          if (f) submitJoin(f);
+        }
+        return;
+      }
+    }
     home();
   }
   boot();

@@ -407,3 +407,13 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
   * { animation: none !important; transition: none !important; }
   .scene .wave { opacity: 0.5; }
 }
+
+/* Inviting the rest of the family: QR code and a share link */
+.join-line { text-align: center; margin: 14px 0 0; color: var(--lava-soft); }
+.join-line .link { font-size: inherit; padding: 0; min-height: 0; }
+.invite { background: var(--paper); border: 2px solid var(--mortar); border-radius: var(--radius); padding: 16px; margin: 18px 0; text-align: center; }
+.invite h2 { margin: 0 0 6px; font-size: 20px; }
+.invite .qr { width: 180px; max-width: 60vw; margin: 12px auto; background: #fff; padding: 6px; border-radius: 8px; }
+.invite .qr svg { display: block; width: 100%; height: auto; }
+.invite .btn { margin-top: 4px; }
+.help.small { font-size: 14px; margin: 10px 0 0; }
