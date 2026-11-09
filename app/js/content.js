@@ -201,6 +201,9 @@ window.GAME = {
       mapQuery: "256 W Grand Ave, Arco, ID 83213",
       find:
         "The judge is off for the holiday, but the county's old office is still open to spies. Find the red brick building where Butte County was run.",
+      // The Bad Guys scramble this riddle; families read it with the decoder wheel from the field kit.
+      // key: the outer-ring letter the inner wheel's A lines up with. message: what it decodes to.
+      wheel: { key: "R", message: "RED BRICK COURTHOUSE" },
       transmission:
         "Station ARCO to all agents.\n\nArco is the county seat, the town where Butte County is run from. " +
         "The county bought this brick building in 1934 for $1,166. " +

@@ -417,3 +417,10 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 .invite .qr svg { display: block; width: 100%; height: auto; }
 .invite .btn { margin-top: 4px; }
 .help.small { font-size: 14px; margin: 10px 0 0; }
+
+/* A riddle scrambled for the decoder wheel */
+.wheel-note .wheel-code { font: 600 26px/1.5 var(--mono); letter-spacing: 0.18em; color: var(--lava); margin: 10px 0 12px; word-spacing: 0.3em; }
+.wheel-note .wheel-code span { display: inline-block; white-space: nowrap; }
+.badguys-note.wheel-note p:last-child { font-size: inherit; }
+.wheel-steps { margin: 0 0 8px; padding-left: 1.3em; font-size: 16px; line-height: 1.45; }
+.wheel-steps li { margin-bottom: 4px; }

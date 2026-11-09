@@ -297,10 +297,10 @@
         return `${topbar(true)}<section class="screen">
           <h1>${esc(label(id))}</h1>
           ${pos ? `<p class="help">Stop ${pos} of ${S.team.route.length} on your route. Its name shows up once you get there.</p>` : ""}
-          <div class="badguys-note">
+          ${r.wheel && !view.plain ? wheelNote(r) : `<div class="badguys-note">
             <p class="radio-from">Intercepted from the Bad Guys</p>
             <p>${esc(r.find)}</p>
-          </div>
+          </div>`}
           <div class="stack">
             <button class="btn primary" data-action="arrived">We're here</button>
             ${p.map
@@ -667,6 +667,29 @@
     }
   }
 
+  // ---------- decoder wheel ----------
+  // The message as it reads on the inner wheel, once the inner A is lined up with the outer key letter.
+  // Each real letter p sits next to inner letter p - key, so that's what we show.
+  function wheelCode(message, key) {
+    const k = key.toUpperCase().charCodeAt(0) - 65;
+    return message.toUpperCase().replace(/[A-Z]/g, (c) => String.fromCharCode(((c.charCodeAt(0) - 65 - k + 26) % 26) + 65));
+  }
+
+  function wheelNote(r) {
+    const words = wheelCode(r.wheel.message, r.wheel.key).split(/\s+/);
+    return `<div class="badguys-note wheel-note">
+      <p class="radio-from">Intercepted from the Bad Guys</p>
+      <p>We scrambled this one. Good luck reading it without a decoder.</p>
+      <p class="wheel-code" aria-label="Coded message">${words.map((w) => `<span>${esc(w)}</span>`).join(" ")}</p>
+      <ol class="wheel-steps">
+        <li>Get the decoder wheel out of your field kit.</li>
+        <li>Turn the small inner wheel until its <strong>A</strong> lines up with the <strong>${esc(r.wheel.key)}</strong> on the big outer wheel.</li>
+        <li>Find each letter above on the inner wheel. The outer letter next to it is the real one. Write them down.</li>
+      </ol>
+      <button class="link" data-action="wheel-plain">Can't read it? Show the riddle instead</button>
+    </div>`;
+  }
+
   // ---------- inviting the rest of the family ----------
   // A link with the team code in it. Opening it on another phone joins the team with no typing.
   const joinLink = () => `${location.origin}${location.pathname}?join=${encodeURIComponent(S.code)}`;
@@ -856,6 +879,7 @@
       case "signup": return go("signup");
       case "join": return go("join");
       case "share-invite": return shareInvite(t);
+      case "wheel-plain": view.plain = true; return render();
       case "home": return home();
       case "board": return S.started ? go("board") : home();
       case "settings": return go("settings");

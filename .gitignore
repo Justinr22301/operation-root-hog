@@ -16,3 +16,9 @@ CLAUDE.md
 
 # Full-size art originals; the app uses the .webp copies
 app/img/*.png
+
+# Print files for the field kits (the newspaper gives away the Press Relay answer)
+print/
+
+# 3D print files (STLs are large; regenerate with print3d/make_models.py)
+print3d/
