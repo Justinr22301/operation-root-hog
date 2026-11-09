@@ -10,6 +10,9 @@ radio feel (Operator steady, Bad Guys low and smug, Gobbles warm and grand). Aft
 `briefing-02-summit.mp3` is cut off on purpose. Stop right on "in the" with no breath after it; the Bad Guys
 break in the instant the file ends.
 
+`briefing-glitch.mp3` is the sound effect for the takeover. It plays for the 3.4-second "SIGNAL HIJACKED"
+screen, then fades out under the Bad Guys' first words.
+
 ---
 
 ## Operator Arco (13 files)

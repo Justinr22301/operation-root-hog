@@ -228,7 +228,13 @@
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce || !fig) return done();
     const LENGTH = 3400; // ms; the CSS animations in app.css (hijack-noise, hijack-label) are timed to match
-    if (window.GAMEAUDIO) { GAMEAUDIO.stop(); GAMEAUDIO.staticBurst(LENGTH / 1000 + 0.2, 0.3); }
+    // The recorded glitch sound; if it can't play, fall back to made-up static.
+    let glitch = null;
+    if (window.GAMEAUDIO) {
+      GAMEAUDIO.stop();
+      glitch = new Audio("audio/briefing-glitch.mp3");
+      glitch.play().catch(() => { glitch = null; GAMEAUDIO.staticBurst(LENGTH / 1000 + 0.2, 0.3); });
+    }
     fig.classList.add("hijack");
     if (frame) frame.classList.add("hijack-frame");
 
@@ -279,6 +285,14 @@
     setTimeout(() => {
       cancelAnimationFrame(raf);
       clearInterval(scramble);
+      // The recording runs longer than the takeover; fade it out under the Bad Guys' first words.
+      if (glitch) {
+        const g = glitch;
+        const fade = setInterval(() => {
+          g.volume = Math.max(0, g.volume - 0.1);
+          if (g.volume <= 0) { g.pause(); clearInterval(fade); }
+        }, 80);
+      }
       done();
     }, LENGTH);
   };
