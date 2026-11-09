@@ -1,6 +1,6 @@
 # Operation Root Hog
 
-The family app for the 2026 Thanksgiving hunt through Arco and Moore.
+The family app for the 2026 Thanksgiving hunt through Arco and Moore. Live at https://station-arco.github.io
 
 ## What's here
 
@@ -52,7 +52,7 @@ then visit http://localhost:8000. Settings has demo tools: show answers, send a 
 
 ## Game master console
 
-`gm.html` (for example https://justinr22301.github.io/operation-root-hog/gm.html) shows every family's progress,
+`gm.html` (for example https://station-arco.github.io/gm.html) shows every family's progress,
 padlock code and last location on a map, writes Family Relay clues, sends transmissions and throws the master switch.
 Add `?mock` to try it with made-up families (needs `demoTools: true`).
 
