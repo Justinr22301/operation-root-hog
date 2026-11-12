@@ -40,7 +40,7 @@
     const tick = () => {
       i = Math.min(text.length, i + 2);
       el.textContent = text.slice(0, i);
-      if (ticks && sound && n++ % 2 === 0 && /\S/.test(text[i - 1] || "")) GAMEAUDIO.tick(0.03);
+      if (ticks && sound && n++ % 2 === 0 && /\S/.test(text[i - 1] || "")) GAMEAUDIO.tick(0.08);
       if (i < text.length) typing = setTimeout(tick, 28);
       else { el.classList.remove("typing"); el.innerHTML = para(text); }
     };
@@ -133,7 +133,7 @@
       return;
     }
     if (step === steps.length) {
-      GAMEAUDIO.hum(sound, 0.02);
+      GAMEAUDIO.hum(sound, 0.05);
       takePhones(false);
       const points = GAME.missionPoints || [];
       const after = 0.7 + points.length * 0.45;
@@ -166,7 +166,7 @@
         </div></footer>`;
     typeInto(document.getElementById("p-text"), b.text, true);
     takePhones(b.voice === "badguys");
-    GAMEAUDIO.hum(sound, b.voice === "badguys" ? 0.05 : 0.035);
+    GAMEAUDIO.hum(sound, b.voice === "badguys" ? 0.11 : 0.08);
     const prev = steps[step - 1];
     const newSpeaker = !prev || prev.voice !== b.voice;
     if (newSpeaker) GAMEAUDIO.staticBurst(0.9);
@@ -174,7 +174,7 @@
     if (b.scene === "blackout" && !reduceMotion) {
       root.classList.add("blackbeat");
       later(() => root.classList.remove("blackbeat"), 1900);
-      if (sound) later(() => GAMEAUDIO.powerDown(3.2, 0.1), 2300);
+      if (sound) later(() => GAMEAUDIO.powerDown(3.2, 0.26), 2300);
     }
     if (sound) {
       const here = step;
@@ -191,7 +191,7 @@
     box.innerHTML = `<h3 style="--d:${delay / 1000}s">Agents activated</h3><ul class="${names.length > 8 ? "many" : ""}">${names
       .map((n, i) => `<li style="--d:${delay / 1000 + 0.5 + i * 0.55}s">${esc(n)}</li>`)
       .join("")}</ul>`;
-    if (sound && !reduceMotion) names.forEach((_, i) => later(() => GAMEAUDIO.thud(0.35), delay + 500 + i * 550));
+    if (sound && !reduceMotion) names.forEach((_, i) => later(() => GAMEAUDIO.thud(0.8), delay + 500 + i * 550));
   }
 
   function speak(here) {
@@ -206,7 +206,7 @@
     sound = !sound;
     if (btn) btn.textContent = sound ? "Pause voice" : "Play voice";
     clearTimeout(timer);
-    if (sound) { GAMEAUDIO.hum(true); speak(step); }
+    if (sound) { GAMEAUDIO.hum(true, 0.08); speak(step); }
     else { GAMEAUDIO.stop(); GAMEAUDIO.hum(false); }
   }
 
@@ -253,7 +253,7 @@
       <div class="fin-gobbles" id="fin-gobbles"></div>
       <div class="fin-confetti" id="fin-confetti" aria-hidden="true"></div>
       <button class="link fin-manual" data-act="light">Light it now</button></section>`;
-    GAMEAUDIO.hum(true, 0.03);
+    GAMEAUDIO.hum(true, 0.07);
     showTeams();
     LINK.onSwitch(lightUp);
   }
@@ -276,7 +276,7 @@
     lit = true;
     const fin = root.querySelector(".fin");
     GAMEAUDIO.hum(false);
-    GAMEAUDIO.thud(0.7);
+    GAMEAUDIO.thud(1.0);
     fin.classList.add("lit");
     [0, 1, 2, 3].forEach((i) => setTimeout(() => { GAMEAUDIO.chime(); }, 300 + i * 550));
     setTimeout(() => {
