@@ -195,6 +195,13 @@
         })
         .subscribe();
     }
+    // Short-lived signals from the TV briefing to every phone (nothing is stored): the Bad Guys' takeover.
+    onRoom(onHijack) {
+      this.client
+        .channel("room")
+        .on("broadcast", { event: "hijack" }, (msg) => onHijack(!!(msg.payload && msg.payload.on)))
+        .subscribe();
+    }
   }
 
   window.makeBackend = function () {

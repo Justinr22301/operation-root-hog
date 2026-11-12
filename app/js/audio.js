@@ -158,5 +158,81 @@
     return speak(text, voice, onDone);
   }
 
-  window.GAMEAUDIO = { ensure, stop, staticBurst, morse, chime, buzz, speak, play };
+  // A low electrical hum under the briefing. Separate from stop(), so it keeps going between scenes.
+  let humNodes = null;
+  function hum(on, volume = 0.035) {
+    const c = ensure();
+    if (!c) return;
+    if (!on) {
+      if (humNodes) {
+        const h = humNodes; humNodes = null;
+        h.gain.gain.setTargetAtTime(0, c.currentTime, 0.25);
+        setTimeout(() => h.oscs.forEach((o) => { try { o.stop(); } catch (e) { /* done */ } }), 1200);
+      }
+      return;
+    }
+    if (humNodes) { humNodes.gain.gain.setTargetAtTime(volume, c.currentTime, 0.4); return; }
+    const gain = c.createGain();
+    gain.gain.value = 0;
+    gain.gain.setTargetAtTime(volume, c.currentTime, 0.6);
+    const low = c.createBiquadFilter();
+    low.type = "lowpass"; low.frequency.value = 260;
+    low.connect(gain).connect(c.destination);
+    const oscs = [[60, "sawtooth", 0.5], [120, "sine", 0.8], [180.6, "sine", 0.25]].map(([f, type, level]) => {
+      const o = c.createOscillator(); const g = c.createGain();
+      o.type = type; o.frequency.value = f; g.gain.value = level;
+      o.connect(g).connect(low); o.start();
+      return o;
+    });
+    humNodes = { gain, oscs };
+  }
+
+  // One teletype tick, for text typing onto the screen.
+  function tick(volume = 0.05) {
+    const c = ensure();
+    if (!c) return;
+    const len = Math.floor(c.sampleRate * 0.012);
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2200;
+    const g = c.createGain(); g.gain.value = volume;
+    src.connect(hp).connect(g).connect(c.destination);
+    src.start();
+  }
+
+  // The power winding down: a falling groan.
+  function powerDown(seconds = 2.6, volume = 0.13) {
+    const c = ensure();
+    if (!c) return;
+    const t = c.currentTime;
+    const o = c.createOscillator(); const g = c.createGain(); const low = c.createBiquadFilter();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(210, t);
+    o.frequency.exponentialRampToValueAtTime(28, t + seconds);
+    low.type = "lowpass"; low.frequency.setValueAtTime(1400, t); low.frequency.exponentialRampToValueAtTime(120, t + seconds);
+    g.gain.setValueAtTime(volume, t);
+    g.gain.linearRampToValueAtTime(0, t + seconds);
+    o.connect(low).connect(g).connect(c.destination);
+    o.start(t); o.stop(t + seconds + 0.05);
+    current.push(o);
+  }
+
+  // A heavy thud, for stamps and the master switch.
+  function thud(volume = 0.5) {
+    const c = ensure();
+    if (!c) return;
+    const t = c.currentTime;
+    const o = c.createOscillator(); const g = c.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.18);
+    g.gain.setValueAtTime(volume, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    o.connect(g).connect(c.destination);
+    o.start(t); o.stop(t + 0.32);
+  }
+
+  window.GAMEAUDIO = { ensure, stop, staticBurst, morse, chime, buzz, speak, play, hum, tick, powerDown, thud };
 })();

@@ -206,6 +206,7 @@
             <p id="start-state" class="help"></p>
             <div class="stack-sm">
               <a class="btn" href="briefing.html" target="_blank" rel="noopener">Show the briefing on the TV</a>
+              <a class="btn" href="briefing.html?finale" target="_blank" rel="noopener">Show the finale on the TV</a>
               <button class="btn primary" data-act="start" id="start-btn">Start the game</button>
             </div>
             <p class="error" id="start-msg"></p>

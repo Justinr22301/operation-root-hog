@@ -782,6 +782,7 @@
     if (!S.code) return;
     if (!subscribed) {
       backend.subscribe(S.code, showTransmission);
+      if (backend.onRoom) backend.onRoom(phoneHijack);
       subscribed = true;
     }
     updateTracking();
@@ -838,8 +839,42 @@
     overlay.querySelector("h2").focus();
   }
 
+  // While the TV briefing is hijacked, phones still on the waiting screen get taken over too.
+  let hijackTimer = null;
+  function phoneHijack(on) {
+    let el = document.getElementById("phone-hijack");
+    clearTimeout(hijackTimer);
+    if (!on || S.started || !["waiting", "settings"].includes(view.name)) {
+      if (el) el.remove();
+      return;
+    }
+    if (el) return;
+    el = document.createElement("div");
+    el.id = "phone-hijack";
+    el.setAttribute("role", "alert");
+    el.innerHTML = `<canvas width="90" height="160"></canvas><div class="ph-words"><p>Signal hijacked</p><span>The Bad Guys are on this frequency</span></div>`;
+    document.body.appendChild(el);
+    const c = el.querySelector("canvas");
+    const ctx = c.getContext("2d");
+    const img = ctx.createImageData(c.width, c.height);
+    const draw = () => {
+      if (!el.isConnected) return;
+      for (let i = 0; i < img.data.length; i += 4) {
+        const v = (Math.random() * 255) | 0;
+        img.data[i] = Math.min(255, v + 70); img.data[i + 1] = v * 0.45; img.data[i + 2] = v * 0.4; img.data[i + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      setTimeout(() => requestAnimationFrame(draw), 60);
+    };
+    draw();
+    try { if (navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 500]); } catch (e) { /* not allowed */ }
+    try { GAMEAUDIO.staticBurst(2.5, 0.25); } catch (e) { /* no sound yet */ }
+    hijackTimer = setTimeout(() => phoneHijack(false), 75000); // never leave a phone stuck
+  }
+
   function showTransmission(msg) {
     if (msg.kind === "start") {
+      phoneHijack(false);
       S.started = true; save();
       if (view.name === "waiting") home();
     }

@@ -48,7 +48,12 @@ then visit http://localhost:8000. Settings has demo tools: show answers, send a 
 1. Families sign up ahead of time. Their phones show a countdown to November 26 and their team code.
 2. On the day, open the console's **Show the briefing on the TV** (`briefing.html`) for the whole room.
 3. Press **Start the game** in the console. Every phone switches to "Start your route" (no kickoff code).
-4. Phones can replay the briefing from Settings. For a dry run, **Put phones back on the waiting screen** resets it.
+4. At the finale, open the console's **Show the finale on the TV** (`briefing.html?finale`). It shows the dark town and
+   lights up when you throw the master switch in the console (press L on the TV's keyboard if it misses it).
+5. Phones can replay the briefing from Settings. For a dry run, **Put phones back on the waiting screen** resets it.
+
+Open the TV pages in the same browser where you're signed in to the console. That's how the TV gets the family
+names for the roll call. During the Bad Guys' break-in, phones still on the waiting screen glitch along with the TV.
 
 ## Game master console
 

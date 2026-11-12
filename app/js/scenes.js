@@ -92,7 +92,7 @@
       <rect width="320" height="180" fill="#9fb3c8"/>
       <rect width="320" height="180" fill="#2d3340" class="dusk"/>
       <path d="M0 130 Q60 92 120 116 T240 104 T320 112 V180 H0z" fill="#6f665c"/>
-      ${town(164, "light-off", 1.5, 0.55)}
+      ${town(164, "light-off", 2.6, 0.6)}
       <rect y="164" width="320" height="16" fill="#1d1b19"/>
       <g transform="translate(276 38)">
         <circle r="24" fill="${LIME}" stroke="${LAVA}" stroke-width="3"/>
@@ -102,6 +102,13 @@
         <circle r="2.4" fill="${LAVA}"/>
       </g>
       <text x="276" y="80" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="11" fill="${LIME}">12:00</text>
+      ${/* the black beat: the screen goes dark and only the Bad Guys' eyes show */ ""}
+      <g class="black-beat">
+        <rect width="320" height="180" fill="#000"/>
+        ${[[63, 78], [104, 62], [160, 44], [217, 56], [259, 82]]
+          .map(([x, y], i) => `<g class="eyes" style="--d:${0.15 + i * 0.16}s" fill="#ff3b2a"><rect x="${x - 7}" y="${y}" width="5.5" height="2" rx="1"/><rect x="${x + 1.5}" y="${y}" width="5.5" height="2" rx="1"/></g>`)
+          .join("")}
+      </g>
     </svg>`,
 
     // Station ARCO calling.
@@ -179,7 +186,7 @@
         <circle cx="48" cy="52" r="5" fill="${LAVA}"/><text x="58" y="48" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">MOORE</text>
         <circle cx="98" cy="122" r="6" fill="${LAVA}"/><text x="108" y="118" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">ARCO</text>
         ${[[34, 66], [66, 40], [86, 104], [118, 132], [74, 140], [126, 98], [104, 70], [40, 120]]
-          .map(([x, y], i) => `<g class="pop" ${d(0.4 + i * 0.25)}>${atom(x, y, 9, RED)}</g>`)
+          .map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="${BLUE}" stroke-width="1.5" class="ping-small" style="--d:${1.2 + i * 0.45}s"/><g class="pop" ${d(0.6 + i * 0.45)}>${atom(x, y, 9, BLUE)}</g>`)
           .join("")}
       </g>
     </svg>`,
@@ -192,7 +199,14 @@
       <g class="pop">${atom(70, 46, 26, YEL)}</g>
       <circle cx="70" cy="46" r="34" fill="${YEL}" opacity=".12" class="blink"/>
       <path d="M0 140 Q80 112 160 132 T320 120 V180 H0z" fill="#1d2433"/>
-      ${town(168, "light-on", 1, 0.22)}
+      ${/* the reactor's signal reaches a relay on each rooftop, then the windows light */ ""}
+      ${town(168, "light-on", 3.1, 0.22)}
+      ${[[33, 119], [73, 103], [108, 125], [134, 125], [172, 95], [215, 113], [256, 121], [307, 109]]
+        .map(([x, y], i) =>
+          `<line x1="70" y1="46" x2="${x}" y2="${y}" stroke="${YEL}" stroke-width="1" stroke-dasharray="3 4" class="draw" style="--d:${0.7 + i * 0.22}s"/>` +
+          `<circle cx="${x}" cy="${y}" r="4" fill="none" stroke="${YEL}" stroke-width="1.2" class="ping-small" style="--d:${1.1 + i * 0.22}s"/>` +
+          `<g class="pop" ${d(0.9 + i * 0.22)}>${atom(x, y, 6.5, YEL)}</g>`)
+        .join("")}
       <rect y="168" width="320" height="12" fill="#14110f"/>
       <text x="306" y="22" text-anchor="end" font-family="Overpass Mono, monospace" font-weight="600" font-size="13" fill="${YEL}">JULY 17, 1955</text>
     </svg>`,
@@ -202,24 +216,27 @@
       <rect width="320" height="180" fill="${LIME}"/>
       ${Array.from({ length: 8 }, (_, i) => {
         const x = 26 + i * 38.5;
-        return `<g><circle cx="${x}" cy="34" r="15" fill="#d2cdc3" stroke="#a9a397" stroke-width="2.5" class="lamp-on" ${d(0.5 + i * 0.35)}/>${atom(x, 34, 9, "#8a8378")}</g>`;
+        return `<g><circle cx="${x}" cy="34" r="15" fill="#d2cdc3" stroke="#a9a397" stroke-width="2.5" class="lamp-on" ${d(2.3 + i * 0.35)}/>` +
+          `<circle cx="${x}" cy="34" r="15" fill="${RED}" class="jam" ${d(i * 0.08)}/>${atom(x, 34, 9, "#8a8378")}</g>`;
       }).join("")}
       <path d="M60 64 L60 84 M260 64 L260 84" stroke="#a9a397" stroke-width="3" stroke-dasharray="4 4"/>
       <g transform="translate(110 114)">
         <path d="M-26 -20 V-34 Q-26 -56 0 -56 Q26 -56 26 -34 V-20" fill="none" stroke="#8a8378" stroke-width="8"/>
         <rect x="-44" y="-22" width="88" height="62" rx="10" fill="${YEL}" stroke="${LAVA}" stroke-width="3"/>
-        ${[0, 1, 2, 3].map((i) => `<rect x="${-36 + i * 19}" y="-6" width="15" height="22" rx="3" fill="#fff" stroke="${LAVA}" stroke-width="2"/><text x="${-28.5 + i * 19}" y="11" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="14" fill="${LAVA}" class="pop" ${d(1.4 + i * 0.7)}>?</text>`).join("")}
+        ${[0, 1, 2, 3].map((i) => `<rect x="${-36 + i * 19}" y="-6" width="15" height="22" rx="3" fill="#fff" stroke="${LAVA}" stroke-width="2"/><text x="${-28.5 + i * 19}" y="11" text-anchor="middle" font-family="Overpass Mono, monospace" font-weight="600" font-size="14" fill="${LAVA}" class="pop" ${d(3.2 + i * 0.7)}>?</text>`).join("")}
       </g>
       <g transform="translate(232 108)">
         <rect x="-30" y="-40" width="60" height="80" rx="6" fill="${LAVA}"/>
         <rect x="-20" y="-28" width="40" height="56" rx="4" fill="#4a4541"/>
-        <g class="throw" ${d(4.2)}><rect x="-4" y="-34" width="8" height="34" rx="3" fill="${RED}"/><circle cy="-34" r="8" fill="${RED}"/></g>
+        <g class="throw" ${d(6.0)}><rect x="-4" y="-34" width="8" height="34" rx="3" fill="${RED}"/><circle cy="-34" r="8" fill="${RED}"/></g>
         <text y="54" text-anchor="middle" font-family="Overpass, sans-serif" font-weight="800" font-size="10" fill="${LAVA}">MASTER SWITCH</text>
       </g>
     </svg>`,
   };
 
   window.SCENES = SCENES;
+  window.sceneTown = town;
+  window.sceneAtom = atom;
 
   // The Bad Guys taking over the broadcast: the picture tears and shifts color, static floods in,
   // "SIGNAL HIJACKED" flashes, and Operator Arco's words scramble. Calls done() when it's time to show their feed.
