@@ -131,7 +131,7 @@ window.GAME = {
     "Every 2 relays you restore unlock 1 digit of your family's padlock code.",
     "Report in on your phone at every relay. Junior agents have puzzles of their own.",
     "Navigators work the phone. Drivers keep their eyes on the road.",
-    "When every family has its code, Station ARCO calls everyone in to throw the master switch together.",
+    "The Bad Guys chained the master switch shut with one padlock for every family. When every family has its code, we unlock it and throw the switch together.",
   ],
 
   relays: [
@@ -143,7 +143,7 @@ window.GAME = {
       place: "Idaho Science Center, 335 S. Front St., Arco",
       mapQuery: "335 S Front St, Arco, ID 83213",
       find:
-        "We hid a relay inside a ship that will never sail again. It stands on the south end of town, a long way from any ocean.",
+        "We jammed a relay inside a ship that will never sail again. It stands on the south end of town, a long way from any ocean.",
       transmission:
         "Station ARCO to all agents.\n\nYou're standing beside the sail of USS Hawkbill, a nuclear submarine. " +
         "The Navy sent it here because the engine for the first nuclear submarine was tested in the desert near Arco. " +
@@ -249,7 +249,7 @@ window.GAME = {
       place: "Bottolfsen Park, Arco",
       mapQuery: "Bottolfsen Park, Arco, ID",
       find:
-        "A newspaperman from this town grew up to run the whole state. Twice. The park with his name has our next relay.",
+        "A newspaperman from this town grew up to run the whole state. Twice. The park with his name hides our next jammer.",
       transmission:
         "Station ARCO to all agents.\n\nIn 1910 a 19-year-old named Clarence Bottolfsen came to Arco to run the town newspaper, the Arco Advertiser. " +
         "He ended up governor of Idaho. The Bad Guys hid a word inside an old front page. Open the newspaper in your field kit. Over.",
@@ -323,13 +323,13 @@ window.GAME = {
     unlockAfter: 3,
     transmission:
       "Station ARCO to your family only.\n\nThis relay is coded for you. No one else in the valley can solve it. Work it out in the car. Over.",
-    waiting: "Your family's clue isn't ready yet. Operator Arco will send it before kickoff.",
+    waiting: "Your family's clue isn't ready yet. Operator Arco will send it before the game starts.",
     junior: { type: "honor", prompt: "Junior agents: tell everyone in the car your favorite Thanksgiving food, then tap Done." },
   },
 
   finale: {
     goTo: "All your relays are back on. Head to the substation: the Arco Rec Center.",
-    lockNote: "This is your family's padlock code. Open your lock on the lockout box, then wait for the other families.",
+    lockNote: "The Bad Guys chained the master switch shut with one padlock for every family. This is your family's code. Open your lock on the lockout box, then wait for the other families.",
     quiz: [
       { text: "Arco was once called Root Hog.", truth: true, why: "That was the town's name before it became Arco." },
       { text: "Count von Arco came to Arco to see the lights turn on in 1955.", truth: false, why: "He died in 1940 and never visited Idaho." },

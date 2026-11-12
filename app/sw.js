@@ -1,6 +1,6 @@
 // Caches the whole app at kickoff so relays still open with no signal.
 // Always tries the network first, so updates show up right away; the cache is the fallback.
-const VERSION = "roothog-v13";
+const VERSION = "roothog-v14";
 const FILES = [
   "./",
   "index.html",
