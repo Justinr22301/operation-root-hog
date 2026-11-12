@@ -16,7 +16,7 @@ window.ANSWER_HASHES = {
       "junior": null
     },
     "hill": {
-      "main": "8073c98b28ea5dc77e252403b3a3c096366b804ae1c72210174d08d89aae506b",
+      "main": "1b905ab3fc8799f3f7b8be9d8cfd65f3ed6f67373d3199496c36745890f5b0e7",
       "junior": null
     },
     "press": {

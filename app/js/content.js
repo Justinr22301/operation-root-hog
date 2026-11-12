@@ -235,10 +235,9 @@ window.GAME = {
         "Since 1920, each graduating class of Butte County High School has painted its year on the rocks above town. " +
         "That's why it's called Number Hill. Some locals like to tell visitors the numbers are high-water marks of the river. They aren't.",
       source: { label: "Wikipedia", url: "https://en.wikipedia.org/wiki/Arco,_Idaho" },
-      // SCOUT: replace with the year you pick while scouting, and update answers.json.
-      clue: "Find the oldest year you can read on the hill.",
+      clue: "Arco was first lit by the atom in 1955. Find the class that graduated 11 years later, and type the two digits painted on the hill.",
       answerKind: "number",
-      hints: ["The class years started in 1920.", "Look for the faded numbers, not the fresh ones."],
+      hints: ["Each number on the hill is the last two digits of a graduation year.", "1955 plus 11 is 1966. Look for 66."],
       junior: { type: "open", prompt: "With binoculars, find the year you were born on the hill. Tap Done when you see it." },
     },
     {
