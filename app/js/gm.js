@@ -11,7 +11,6 @@
     { sender: "Ambassador Gobbles", voice: "gobbles" },
   ];
   const SAVED_LINES = [
-    { sender: "The Bad Guys", body: "Breaking in on this frequency. Your ambassador wouldn't stop talking about gratitude, so we took him to the substation. Bring every code you've got. Bad Guys out." },
     { sender: "Operator Arco", body: "Station ARCO to all agents. Head to the Arco Rec Center now. The switch goes at noon. Over." },
     { sender: "Operator Arco", body: "Station ARCO to all agents. Check in. If you're stuck, use a hint. It only costs 25 points. Over." },
   ];
@@ -206,7 +205,9 @@
             <p id="start-state" class="help"></p>
             <div class="stack-sm">
               <a class="btn" href="briefing.html" target="_blank" rel="noopener">Show the briefing on the TV</a>
+              <a class="btn" href="briefing.html?board" target="_blank" rel="noopener">Show the live relay board on the TV</a>
               <a class="btn" href="briefing.html?finale" target="_blank" rel="noopener">Show the finale on the TV</a>
+              <button class="btn" data-act="twist">Send the Gobbles twist</button>
               <button class="btn primary" data-act="start" id="start-btn">Start the game</button>
             </div>
             <p class="error" id="start-msg"></p>
@@ -493,6 +494,30 @@
 
   // Two clicks, like the master switch, so a slip can't start (or un-start) the game.
   let startArm = null;
+  // Mid-game: the Bad Guys tell every phone they've locked Gobbles in with the master switch.
+  let twistArm = null;
+  async function onTwist(btn) {
+    const msg = $("#start-msg");
+    const label = "Send the Gobbles twist";
+    if (!btn.classList.contains("armed")) {
+      btn.classList.add("armed");
+      btn.textContent = "Click again to send it to every phone";
+      twistArm = setTimeout(() => { btn.classList.remove("armed"); btn.textContent = label; }, 6000);
+      return;
+    }
+    clearTimeout(twistArm);
+    btn.classList.remove("armed");
+    btn.textContent = label;
+    try {
+      const t = window.GAME.twist;
+      await api.send(t.text, t.from, t.voice, null);
+      flash(msg, "Sent. Every phone gets the Bad Guys' break-in.");
+      await load();
+    } catch (err) {
+      msg.textContent = err.message || "Couldn't send it.";
+    }
+  }
+
   async function onStart(btn) {
     const msg = $("#start-msg");
     const starting = !data.started;
@@ -521,6 +546,7 @@
     if (act) {
       const a = act.dataset.act;
       if (a === "start") return onStart(act);
+      if (a === "twist") return onTwist(act);
       if (a === "refresh") return load();
       if (a === "signout") return api.signOut().then(() => loginView());
       if (a === "switch") return onSwitch(act);

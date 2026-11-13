@@ -1,6 +1,6 @@
 // Caches the whole app at kickoff so relays still open with no signal.
 // Always tries the network first, so updates show up right away; the cache is the fallback.
-const VERSION = "roothog-v17";
+const VERSION = "roothog-v19";
 const FILES = [
   "./",
   "index.html",
@@ -29,6 +29,10 @@ const FILES = [
   "audio/relay-island.mp3",
   "audio/relay-family.mp3",
   "audio/finale-victory.mp3",
+  "audio/taunt-1.mp3",
+  "audio/taunt-2.mp3",
+  "audio/taunt-3.mp3",
+  "audio/twist-gobbles.mp3",
   "js/backend.js",
   "js/app.js",
   "fonts/overpass-latin-400-normal.woff2",

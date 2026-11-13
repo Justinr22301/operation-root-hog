@@ -61,5 +61,15 @@
     }, 5000);
   }
 
-  window.TVLINK = { teams, hijackPhones, onSwitch, live: !!client, mock };
+  // Has this exact line been sent to every phone? (Used to tell if the Gobbles twist has happened.)
+  async function sent(text) {
+    if (mock) return /[?&]twist\b/.test(location.search);
+    if (!client) return false;
+    try {
+      const res = await client.from("broadcasts").select("id").eq("body", text).limit(1);
+      return !!(res.data && res.data.length);
+    } catch (e) { return false; }
+  }
+
+  window.TVLINK = { teams, hijackPhones, onSwitch, sent, live: !!client, mock };
 })();

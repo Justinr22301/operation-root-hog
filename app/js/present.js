@@ -5,8 +5,9 @@
   const root = document.getElementById("present");
   const steps = GAME.briefing;
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const LINK = window.TVLINK || { teams: async () => [], hijackPhones() {}, onSwitch() {} };
+  const LINK = window.TVLINK || { teams: async () => [], hijackPhones() {}, onSwitch() {}, sent: async () => false };
   const FINALE = /[?&]finale\b/.test(location.search);
+  const BOARD = /[?&]board\b/.test(location.search);
   let step = -1; // -1 = title card, steps.length = end card
   let sound = true;
   let timer = null;
@@ -256,6 +257,59 @@
     GAMEAUDIO.hum(true, 0.07);
     showTeams();
     LINK.onSwitch(lightUp);
+    if (GAME.twist) {
+      LINK.sent(GAME.twist.text).then((yes) => {
+        const sub = document.getElementById("fin-sub");
+        if (yes && sub && !lit) sub.textContent = "Ambassador Gobbles is locked inside with the master switch. Every family opens its padlock to free him.";
+      });
+    }
+  }
+
+  // ---------- the live relay board, for the TV while families are out ----------
+  function renderBoard(armed) {
+    if (!armed) {
+      root.innerHTML = `<section class="p-card">${plate}<h1>Live relay board</h1>
+        <p>Leave this on the TV while the families are out. It updates by itself every few seconds.</p>
+        <button class="btn primary" data-act="arm-board">Show the board</button>
+        <p class="help" style="margin-top:3vh">F: full screen. Open this in the browser where you're signed in to the console.</p></section>`;
+      return;
+    }
+    const total = GAME.relays.length + 1;
+    root.innerHTML = `<section class="brd">
+      <header class="p-top"><strong>STATION ARCO · RELAY BOARD</strong>${clock(false)}</header>
+      <div class="brd-total"><div class="brd-bar"><i id="brd-fill"></i></div><p id="brd-count">Listening for relays…</p></div>
+      <ul class="brd-rows" id="brd-rows"></ul></section>`;
+    const seen = {};
+    let first = true;
+    const draw = async () => {
+      const rows = document.getElementById("brd-rows");
+      if (!rows) return;
+      const teams = await LINK.teams();
+      if (!teams.length) {
+        document.getElementById("brd-count").textContent = "No families yet. Sign in to the console in this browser, then reload.";
+        return;
+      }
+      let done = 0;
+      let fresh = false;
+      rows.style.setProperty("--n", teams.length);
+      rows.innerHTML = teams.map((t) => {
+        const n = Math.min(t.restored, total);
+        done += n;
+        const was = seen[t.name] == null ? (first ? n : 0) : seen[t.name];
+        if (n > was) fresh = true;
+        seen[t.name] = n;
+        return `<li class="${n >= total ? "done" : ""}"><span class="brd-name">${esc(t.name)}</span>
+          <span class="brd-lamps">${Array.from({ length: total }, (_, i) => `<i class="${i < n ? "on" : ""} ${i >= was && i < n ? "new" : ""}"></i>`).join("")}</span>
+          <span class="brd-digits">${n >= total ? "Code complete" : `${Math.floor(n / 2)} of 4 digits`}</span></li>`;
+      }).join("");
+      const all = teams.length * total;
+      document.getElementById("brd-fill").style.width = `${(done / all) * 100}%`;
+      document.getElementById("brd-count").textContent = done >= all ? "Every relay restored. All agents to the substation." : `${done} of ${all} relays restored`;
+      if (fresh && !first) GAMEAUDIO.chime();
+      first = false;
+    };
+    draw();
+    setInterval(draw, 8000);
   }
 
   async function showTeams() {
@@ -310,16 +364,19 @@
     if (act === "full") return fullScreen();
     if (act === "arm") { fullScreen(); return renderFinale(true); }
     if (act === "light") return lightUp();
+    if (act === "arm-board") { fullScreen(); return renderBoard(true); }
   });
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "f" || e.key === "F") return fullScreen();
+    if (BOARD) return;
     if (FINALE) { if (e.key === "l" || e.key === "L") { GAMEAUDIO.ensure(); lightUp(); } return; }
     if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); GAMEAUDIO.ensure(); show(step + 1); }
     else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); show(step - 1); }
     else if (e.key === "p" || e.key === "P") toggleSound(root.querySelector('[data-act="sound"]'));
   });
 
-  if (FINALE) renderFinale(false);
+  if (BOARD) renderBoard(false);
+  else if (FINALE) renderFinale(false);
   else show(-1);
 })();

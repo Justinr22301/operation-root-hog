@@ -88,7 +88,7 @@ screen, then fades out under the Bad Guys' first words.
 
 ---
 
-## The Bad Guys (2 files)
+## The Bad Guys (6 files)
 
 **briefing-03-badguys.mp3**
 > Breaking in on this frequency. This is the Bad Guys, calling every so-called agent in the Lost River Valley.
@@ -101,6 +101,18 @@ screen, then fades out under the Bad Guys' first words.
 > We've jammed every relay in the valley. Good luck finding them.
 >
 > Bad Guys out.
+
+**taunt-1.mp3** (breaks in on a family's phone after its 2nd relay)
+> Breaking in on this frequency. One digit, agents? Cute. That lock has four, and the next relay is hidden better than the last. Bad Guys out.
+
+**taunt-2.mp3** (after its 4th relay)
+> Bad Guys to the so-called agents. Two digits. Fine. You're halfway, and we are getting annoyed. Nobody finds the rest. Nobody. Bad Guys out.
+
+**taunt-3.mp3** (after its 6th relay)
+> This is the Bad Guys. Three digits? Who is helping you? No matter. The last relays are the hard ones, and noon is coming fast. Bad Guys out.
+
+**twist-gobbles.mp3** (the mid-game twist, sent from the console's "Send the Gobbles twist" button)
+> Breaking in on this frequency. Your ambassador would not stop talking about gratitude, so we took him. Ambassador Gobbles is locked inside the substation with the master switch. Bring every code you've got. Bad Guys out.
 
 ---
 

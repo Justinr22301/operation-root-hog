@@ -214,6 +214,7 @@
       return `${topbar(false)}<section class="screen waiting">
         ${wordmark(true)}
         <h1>You're signed up</h1>
+        ${agentCard()}
         <p class="countdown">${esc(when)}</p>
         <p class="lede">${esc(GAME.gameDay.where)}</p>
         <div class="code-card">
@@ -328,7 +329,7 @@
       if (!S.quizStarted) {
         return `${topbar(false)}<section class="screen">
           <h1>All relays restored</h1>
-          <p class="lede">${esc(GAME.finale.goTo)}</p>
+          <p class="lede">${esc(S.twist && GAME.finale.goToTwist ? GAME.finale.goToTwist : GAME.finale.goTo)}</p>
           <p class="code-big lock" aria-label="Padlock code">${esc((S.digits || "????").split("").join(" "))}</p>
           <p>${esc(GAME.finale.lockNote)}</p>
           <button class="btn primary" data-action="quiz-start">We're at the substation</button>
@@ -434,7 +435,7 @@
     return `${topbar(true)}<section class="screen restored-screen">
       <div class="lamp big on" aria-hidden="true">${ATOM}</div>
       <h1>${esc(r.name)} restored</h1>
-      ${newDigit ? `<p class="lede">New digit for your code: <span class="digit">${esc(digitsNow.slice(-1))}</span></p>` : `<p class="lede">${restoredIds().length} of ${allIds().length} relays restored.</p>`}
+      ${newDigit ? `<p class="lede">New digit for your code</p>${digitReel(digitsNow)}` : `<p class="lede">${restoredIds().length} of ${allIds().length} relays restored.</p>`}
       ${r.history ? `<article class="history"><h2>True history</h2><p>${esc(r.history)}</p></article>` : ""}
       <div class="stack">
         ${allDone()
@@ -445,6 +446,32 @@
         <button class="btn" data-action="board">Relay board</button>
       </div>
     </section>`;
+  }
+
+  // The family's code so far, with the newest digit spinning in like a combination dial.
+  function digitReel(digits) {
+    const last = digits.length - 1;
+    const spin = Array.from({ length: 14 }, (_, i) => (Number(digits[last]) + 3 + i * 7) % 10).concat(digits[last]);
+    return `<div class="code-slots reveal" aria-label="Your code so far: ${esc(digits.split("").join(" "))}">${[0, 1, 2, 3]
+      .map((i) => i === last
+        ? `<span class="slot filled roll"><span class="reel" style="--n:${spin.length - 1}">${spin.map((d) => `<i>${esc(d)}</i>`).join("")}</span></span>`
+        : `<span class="slot ${digits[i] ? "filled" : ""}">${esc(digits[i] || "")}</span>`)
+      .join("")}</div>`;
+  }
+
+  // The family's agent card, shown while they wait for game day.
+  function agentCard() {
+    const t = S.team || {};
+    const agents = t.agents || [];
+    return `<div class="id-card">
+      <div class="id-band">${ATOM}<div><small>Operation Root Hog</small><b>Station ARCO</b></div></div>
+      <div class="id-body">
+        <p class="id-role">Field team</p>
+        <p class="id-name">${esc(t.name || "")}</p>
+        ${agents.length ? `<ul class="id-agents">${agents.map((a) => `<li class="${isJuniorAgent(a) ? "jr" : ""}">${esc(a.name)}</li>`).join("")}</ul>` : ""}
+      </div>
+      <span class="id-stamp">Clearance granted</span>
+    </div>`;
   }
 
   function victoryView() {
@@ -529,7 +556,23 @@
         GAMEAUDIO.staticBurst(0.7);
         typeInto(el, relayById(view.id).transmission);
       }
-      if (view.justRestored) { GAMEAUDIO.chime(); view.justRestored = false; }
+      if (view.justRestored) {
+        GAMEAUDIO.chime();
+        view.justRestored = false;
+        const rolling = !!app.querySelector(".slot.roll");
+        if (rolling) {
+          let n = 0;
+          const ticking = setInterval(() => { if (++n > 16) clearInterval(ticking); else GAMEAUDIO.tick(0.12); }, 100);
+          setTimeout(() => GAMEAUDIO.thud(0.8), 1850);
+        }
+        const count = restoredIds().length;
+        const taunt = (GAME.taunts || {})[count];
+        S.taunted = S.taunted || {};
+        if (taunt && !S.taunted[count]) {
+          S.taunted[count] = true; save();
+          setTimeout(() => badGuysBreakIn(taunt), rolling ? 4500 : 2000);
+        }
+      }
       keepAwake();
     },
     finale() {
@@ -841,10 +884,10 @@
 
   // While the TV briefing is hijacked, phones still on the waiting screen get taken over too.
   let hijackTimer = null;
-  function phoneHijack(on) {
+  function phoneHijack(on, anywhere) {
     let el = document.getElementById("phone-hijack");
     clearTimeout(hijackTimer);
-    if (!on || S.started || !["waiting", "settings"].includes(view.name)) {
+    if (!on || (!anywhere && (S.started || !["waiting", "settings"].includes(view.name)))) {
       if (el) el.remove();
       return;
     }
@@ -872,7 +915,21 @@
     hijackTimer = setTimeout(() => phoneHijack(false), 75000); // never leave a phone stuck
   }
 
+  // A short burst of the takeover screen, then the Bad Guys' message.
+  function badGuysBreakIn(line, sender) {
+    phoneHijack(true, true);
+    setTimeout(() => {
+      phoneHijack(false);
+      showTransmission({ sender: sender || "The Bad Guys", voice: "badguys", body: line.text, audio: line.audio, shown: true });
+    }, 2000);
+  }
+
   function showTransmission(msg) {
+    // The mid-game twist gets the full break-in and its recording.
+    if (GAME.twist && !msg.shown && msg.body === GAME.twist.text) {
+      S.twist = true; save();
+      return badGuysBreakIn(GAME.twist, GAME.twist.from);
+    }
     if (msg.kind === "start") {
       phoneHijack(false);
       S.started = true; save();
@@ -900,6 +957,7 @@
     overlay.hidden = false;
     typeInto(document.getElementById("tx-text"), msg.body || "");
     overlay.querySelector("button").focus();
+    if (msg.audio) setTimeout(() => { if (!overlay.hidden) GAMEAUDIO.play(msg.audio, msg.body, msg.voice); }, 1000);
   }
 
   // ---------- events ----------
@@ -965,7 +1023,7 @@
       case "throw-switch": S.switchThrown = true; save(); GAMEAUDIO.chime(); return go("finale");
       case "test-transmission":
         return backend.testBroadcast
-          ? backend.testBroadcast({ sender: "The Bad Guys", voice: "badguys", body: "Your ambassador wouldn't stop talking about gratitude, so we took him to the substation. Bring every code you've got. All of them. Or the gravy goes cold." })
+          ? backend.testBroadcast({ sender: GAME.twist.from, voice: GAME.twist.voice, body: GAME.twist.text })
           : toast("Test transmissions come from the game master console.");
       case "close-overlay": overlay.hidden = true; overlay.innerHTML = ""; GAMEAUDIO.stop(); return;
       case "reset":

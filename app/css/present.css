@@ -108,3 +108,21 @@ body.present { background: #161412; color: #f6dc7a; margin: 0; overflow: hidden;
 .fin-gobbles .p-words { border-left-color: #8fb4f0; }
 .fin-confetti i { position: absolute; top: -4vh; width: 0.9vw; height: 1.6vw; opacity: 0.9; transform: rotate(var(--r)); animation: confetti var(--t) var(--d) linear infinite; }
 @keyframes confetti { to { top: 104vh; transform: rotate(calc(var(--r) + 540deg)); } }
+
+
+/* Live relay board */
+.brd { grid-row: 1 / -1; display: grid; grid-template-rows: auto auto 1fr; gap: 2.4vh; min-height: 0; }
+.brd-bar { height: 2.2vh; background: #2a2623; border-radius: 1.1vh; overflow: hidden; }
+.brd-bar i { display: block; height: 100%; width: 0; background: var(--sign-yellow); transition: width 1.2s ease-out; }
+.brd-total p { font: 600 clamp(14px, 1.6vw, 30px) var(--mono); color: #d9d0b3; margin: 1vh 0 0; }
+.brd-rows { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-rows: minmax(0, min(11vh, calc(70vh / var(--n, 6)))); align-content: start; gap: 1vh; min-height: 0; }
+.brd-rows li { display: grid; grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 0.7fr); gap: 2vw; align-items: center; background: #201d1a; border-left: 0.6vw solid var(--atom-red); border-radius: 0.5vw; padding: 0 1.6vw; }
+.brd-rows li.done { border-left-color: var(--sign-yellow); }
+.brd-name { font: 800 clamp(16px, 2.2vw, 44px) var(--sans); color: #f1ead6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brd-lamps { display: flex; gap: 0.9vw; }
+.brd-lamps i { width: min(3.4vw, 6vh); height: min(3.4vw, 6vh); border-radius: 50%; background: #4a1712; border: 0.2vw solid #6b2018; }
+.brd-lamps i.on { background: radial-gradient(circle at 40% 35%, #fff6c9, var(--sign-yellow)); border-color: #c9a10f; box-shadow: 0 0 1.4vw rgba(242, 195, 24, 0.6); }
+.brd-lamps i.new { animation: lamp-pop 0.9s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes lamp-pop { 0% { transform: scale(0.3); } 50% { transform: scale(1.6); } }
+.brd-digits { font: 600 clamp(12px, 1.4vw, 28px) var(--mono); color: #d9d0b3; text-align: right; }
+.brd-rows li.done .brd-digits { color: var(--sign-yellow); }

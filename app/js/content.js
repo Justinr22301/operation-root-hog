@@ -134,6 +134,33 @@ window.GAME = {
     "The Bad Guys chained the master switch shut with one padlock for every family. When every family has its code, we unlock it and throw the switch together.",
   ],
 
+  // The Bad Guys break in on a family's phone when it restores its 2nd, 4th and 6th relay.
+  // audio: the recording (see VOICE-SCRIPT.md); until the file exists the phone reads the line aloud.
+  taunts: {
+    2: {
+      audio: "audio/taunt-1.mp3",
+      text: "Breaking in on this frequency. One digit, agents? Cute. That lock has four, and the next relay is hidden better than the last. Bad Guys out.",
+    },
+    4: {
+      audio: "audio/taunt-2.mp3",
+      text: "Bad Guys to the so-called agents. Two digits. Fine. You're halfway, and we are getting annoyed. Nobody finds the rest. Nobody. Bad Guys out.",
+    },
+    6: {
+      audio: "audio/taunt-3.mp3",
+      text: "This is the Bad Guys. Three digits? Who is helping you? No matter. The last relays are the hard ones, and noon is coming fast. Bad Guys out.",
+    },
+  },
+
+  // The mid-game twist, sent to every phone from the console's "Send the Gobbles twist" button.
+  twist: {
+    from: "The Bad Guys",
+    voice: "badguys",
+    audio: "audio/twist-gobbles.mp3",
+    text:
+      "Breaking in on this frequency. Your ambassador would not stop talking about gratitude, so we took him. " +
+      "Ambassador Gobbles is locked inside the substation with the master switch. Bring every code you've got. Bad Guys out.",
+  },
+
   relays: [
     {
       id: "sub",
@@ -328,6 +355,7 @@ window.GAME = {
 
   finale: {
     goTo: "All your relays are back on. Head to the substation: the Arco Rec Center.",
+    goToTwist: "All your relays are back on. Ambassador Gobbles is locked in the substation with the master switch. Head to the Arco Rec Center.",
     lockNote: "The Bad Guys chained the master switch shut with one padlock for every family. This is your family's code. Open your lock on the lockout box, then wait for the other families.",
     quiz: [
       { text: "Arco was once called Root Hog.", truth: true, why: "That was the town's name before it became Arco." },

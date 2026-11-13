@@ -448,3 +448,28 @@ input:focus, textarea:focus { border-color: var(--sign-blue); outline: none; }
 #phone-hijack span { font: 600 16px var(--mono); color: #ffd9c9; }
 @keyframes ph-shake { 0% { transform: translate(0, 0); } 50% { transform: translate(-2px, 1px); } 100% { transform: translate(2px, -1px); } }
 @media (prefers-reduced-motion: reduce) { #phone-hijack { animation: none; } }
+
+
+/* The newest digit spins in like a combination dial */
+.code-slots.reveal { justify-content: center; margin: 4px 0 18px; }
+.slot.roll { display: block; overflow: hidden; padding: 0; animation: slot-land 0.3s 1.85s ease-out both; }
+.slot.roll .reel { display: block; animation: reel 1.85s cubic-bezier(.15, .7, .25, 1) both; }
+.slot.roll .reel i { display: grid; place-items: center; height: 62px; font-style: normal; }
+@keyframes reel { from { transform: translateY(0); } to { transform: translateY(calc(var(--n) * -62px)); } }
+@keyframes slot-land { 0% { transform: scale(1.25); box-shadow: 0 0 0 6px rgba(242, 195, 24, 0.5); } 100% { transform: none; box-shadow: none; } }
+@media (prefers-reduced-motion: reduce) { .slot.roll .reel { animation-duration: 0.01s; } }
+
+/* Agent card on the waiting screen */
+.id-card { position: relative; background: var(--paper); border: 2px solid var(--lava); border-radius: 14px; overflow: hidden; margin: 14px 0 18px; animation: fade-up 0.5s 0.1s both; }
+.id-band { display: flex; align-items: center; gap: 10px; background: var(--sign-blue); color: #fff; padding: 10px 14px; }
+.id-band svg { width: 30px; height: 30px; color: var(--sign-yellow); flex: none; }
+.id-band small { display: block; font: 600 11px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sign-yellow); }
+.id-band b { font-weight: 800; font-size: 19px; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+.id-body { padding: 12px 14px 44px; }
+.id-role { font: 600 12px var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sign-blue); margin: 0; }
+.id-name { font-weight: 800; font-size: 26px; line-height: 1.1; margin: 2px 0 10px; overflow-wrap: anywhere; }
+.id-agents { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; }
+.id-agents li { font-weight: 600; font-size: 15px; padding: 3px 10px; border-radius: 6px; background: var(--sign-blue); color: #fff; }
+.id-agents li.jr { background: var(--atom-red); }
+.id-stamp { position: absolute; right: 12px; bottom: 12px; transform: rotate(-8deg); border: 3px solid var(--atom-red); color: var(--atom-red); font: 800 13px var(--sans); letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; background: rgba(255, 255, 255, 0.7); animation: id-stamp 0.4s 0.9s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes id-stamp { from { opacity: 0; transform: rotate(-8deg) scale(2.6); } }
