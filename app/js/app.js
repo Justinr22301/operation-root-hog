@@ -266,6 +266,7 @@
       const digits = (S.digits || "").padEnd(4, " ").split("");
       return `${topbar(false)}<section class="screen">
         <h1>Relay board</h1>
+        ${view.celebrate ? `<p class="lede just-restored">${esc(relayById(view.celebrate).name)} restored.</p>` : ""}
         <p class="help">${restoredIds().length} of ${ids.length} relays restored. Every two relays give you one digit of your family's code.</p>
         <ol class="lamps">
           ${ids.map((id, i) => {
@@ -274,10 +275,10 @@
             const on = p && p.stage === "restored";
             const locked = id === "family" && !familyUnlocked();
             const current = id === nxt;
-            return `<li class="lamp-item"><button class="lamp ${on ? "on" : ""} ${current ? "current" : ""} ${locked ? "locked" : ""}" data-action="open-relay" data-id="${id}" ${locked ? "disabled" : ""} aria-label="${esc(label(id))}${on ? ", restored" : locked ? ", unlocks after 3 relays" : ""}">${ATOM}</button><span class="lamp-label">${esc(shortLabel(id))}</span></li>`;
+            return `<li class="lamp-item"><button class="lamp ${on ? "on" : ""} ${current ? "current" : ""} ${locked ? "locked" : ""} ${id === view.celebrate ? "just" : ""}" data-action="open-relay" data-id="${id}" ${locked ? "disabled" : ""} aria-label="${esc(label(id))}${on ? ", restored" : locked ? ", unlocks after 3 relays" : ""}">${ATOM}</button><span class="lamp-label">${esc(shortLabel(id))}</span></li>`;
           }).join("")}
         </ol>
-        <div class="code-slots" aria-label="Your code so far">${digits.map((d) => `<span class="slot ${d.trim() ? "filled" : ""}">${esc(d.trim() || "")}</span>`).join("")}</div>
+        ${view.newDigit && S.digits ? digitReel(S.digits) : `<div class="code-slots" aria-label="Your code so far">${digits.map((d) => `<span class="slot ${d.trim() ? "filled" : ""}">${esc(d.trim() || "")}</span>`).join("")}</div>`}
         <div class="stack">
           ${nxt ? `<button class="btn primary" data-action="open-relay" data-id="${nxt}">${restoredIds().length || Object.keys(S.progress).length ? "Next" : "Start your route"}: ${esc(label(nxt))}</button>` : ""}
           ${familyUnlocked() && !fam ? `<button class="btn" data-action="open-relay" data-id="family">Solve the Family Relay in the car</button>` : ""}
@@ -556,23 +557,7 @@
         GAMEAUDIO.staticBurst(0.7);
         typeInto(el, relayById(view.id).transmission);
       }
-      if (view.justRestored) {
-        GAMEAUDIO.chime();
-        view.justRestored = false;
-        const rolling = !!app.querySelector(".slot.roll");
-        if (rolling) {
-          let n = 0;
-          const ticking = setInterval(() => { if (++n > 16) clearInterval(ticking); else GAMEAUDIO.tick(0.12); }, 100);
-          setTimeout(() => GAMEAUDIO.thud(0.8), 1850);
-        }
-        const count = restoredIds().length;
-        const taunt = (GAME.taunts || {})[count];
-        S.taunted = S.taunted || {};
-        if (taunt && !S.taunted[count]) {
-          S.taunted[count] = true; save();
-          setTimeout(() => badGuysBreakIn(taunt), rolling ? 4500 : 2000);
-        }
-      }
+      if (view.justRestored) { GAMEAUDIO.chime(); view.justRestored = false; }
       keepAwake();
     },
     finale() {
@@ -581,7 +566,23 @@
         typeInto(el, GAME.finale.victory.text);
       }
     },
-    board() { keepAwake(); },
+    board() {
+      keepAwake();
+      if (!view.celebrate) return;
+      // Just restored a relay: chime, spin the new digit in, then let the Bad Guys break in.
+      const rolling = view.newDigit && !!app.querySelector(".slot.roll");
+      const taunt = view.taunt ? GAME.taunts[view.taunt] : null;
+      view.celebrate = null; view.newDigit = false; view.taunt = 0; // once only; later redraws are plain
+      GAMEAUDIO.chime();
+      if (rolling) {
+        const slots = app.querySelector(".code-slots");
+        if (slots && slots.scrollIntoView) slots.scrollIntoView({ block: "center", behavior: "smooth" });
+        let n = 0;
+        const ticking = setInterval(() => { if (++n > 16) clearInterval(ticking); else GAMEAUDIO.tick(0.12); }, 100);
+        setTimeout(() => GAMEAUDIO.thud(0.8), 1850);
+      }
+      if (taunt) setTimeout(() => badGuysBreakIn(taunt), rolling ? 3600 : 1800);
+    },
   };
 
   function addAgentRow(box) {
@@ -650,7 +651,14 @@
       }
     }
     save();
-    go("relay", { id, justRestored: true, newDigit: (S.digits || "").length > before });
+    // A relay that earns a digit, or a visit from the Bad Guys, goes straight to the relay board: the lamp comes on,
+    // the digit spins in, then they break in. Other relays show their own "restored" screen.
+    const gotDigit = (S.digits || "").length > before;
+    const count = restoredIds().length;
+    const taunt = (GAME.taunts || {})[count];
+    if (taunt && taunt.audio && GAMEAUDIO.preload) GAMEAUDIO.preload(taunt.audio).catch(() => {}); // start loading while the tap is fresh
+    if (gotDigit || taunt) return go("board", { celebrate: id, newDigit: gotDigit, taunt: taunt ? count : 0 });
+    go("relay", { id, justRestored: true, newDigit: false });
   }
 
   // While offline we can't know the digits, so we keep what we have.

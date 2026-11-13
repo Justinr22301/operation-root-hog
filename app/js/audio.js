@@ -146,16 +146,43 @@
 
   let fileAudio = null;
   // Plays a recorded file if one is set, otherwise reads the text aloud. onDone runs when it finishes.
+  // Recordings play through the sound engine (the same one as the static and chimes). Phones only let a page start
+  // sound by itself, with no tap, on an engine a tap has already switched on. A plain <audio> started from a timer
+  // (a Bad Guys break-in, the next briefing scene) is blocked on iPhones.
+  const buffers = {};
+  function preload(file) {
+    const c = ensure();
+    if (!file || !c || !window.fetch) return Promise.reject(new Error("no sound engine"));
+    if (!buffers[file]) {
+      buffers[file] = fetch(file)
+        .then((r) => { if (!r.ok) throw new Error("missing"); return r.arrayBuffer(); })
+        .then((data) => new Promise((ok, bad) => c.decodeAudioData(data, ok, bad)));
+      buffers[file].catch(() => { delete buffers[file]; });
+    }
+    return buffers[file];
+  }
+
   function play(file, text, voice, onDone) {
     stop();
-    if (file) {
-      const my = ++playId;
+    if (!file) return speak(text, voice, onDone);
+    const my = ++playId;
+    const older = () => {
+      if (my !== playId) return;
       fileAudio = new Audio(file);
       fileAudio.onended = () => { if (my === playId && onDone) onDone(); };
-      fileAudio.play().catch(() => speak(text, voice, onDone));
-      return true;
-    }
-    return speak(text, voice, onDone);
+      fileAudio.play().catch(() => { if (my === playId) speak(text, voice, onDone); });
+    };
+    preload(file).then((buf) => {
+      if (my !== playId) return;
+      const c = ensure();
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      src.connect(c.destination);
+      src.onended = () => { if (my === playId && onDone) onDone(); };
+      src.start();
+      current.push(src);
+    }).catch(older);
+    return true;
   }
 
   // A low electrical hum under the briefing. Separate from stop(), so it keeps going between scenes.
@@ -234,5 +261,5 @@
     o.start(t); o.stop(t + 0.32);
   }
 
-  window.GAMEAUDIO = { ensure, stop, staticBurst, morse, chime, buzz, speak, play, hum, tick, powerDown, thud };
+  window.GAMEAUDIO = { ensure, stop, staticBurst, morse, chime, buzz, speak, play, preload, hum, tick, powerDown, thud };
 })();
